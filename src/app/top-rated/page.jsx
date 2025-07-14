@@ -1,13 +1,12 @@
-import PopularMovies from "../components/PopularMovies";
+import TopRatedMovies from "@/components/TopRatedMovies";
 
-export default function Home() {
-
+export default function TopRatedPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-extrabold text-white text-center mb-12">
-        Popular Movies
+        Top 300 Rated Movies
       </h1>
-      <PopularMovies />
+      <TopRatedMovies />
     </div>
   );
 }

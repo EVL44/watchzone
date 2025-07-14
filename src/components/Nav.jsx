@@ -37,6 +37,11 @@ export default function Nav() {
             {/* Right side: Auth Links & Mobile Menu Button */}
             <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center gap-2">
+                 <Link href="/top-rated">
+                  <span className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                    Top Rated
+                  </span>
+                </Link>
                 <Link href="/watchlist">
                   <span className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
                     Watchlist
@@ -91,6 +96,11 @@ export default function Nav() {
 
           {/* Mobile Menu Links */}
           <div className="flex flex-col gap-2">
+             <Link href="/top-rated" onClick={() => setIsMenuOpen(false)}>
+              <span className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-3 rounded-md text-lg font-medium">
+                Top Rated
+              </span>
+            </Link>
             <Link href="/watchlist" onClick={() => setIsMenuOpen(false)}>
               <span className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-3 rounded-md text-lg font-medium">
                 Watchlist
