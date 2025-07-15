@@ -46,7 +46,7 @@ export default function TopRatedMovies() {
         {movies.map((movie, index) => (
           <li key={movie.id}>
             <Link href={`/movie/${movie.id}`}>
-              <div className="bg-stone-800 rounded-lg overflow-hidden p-4 flex items-start transform hover:bg-stone-700 transition-colors duration-300 ease-in-out cursor-pointer">
+              <div className="bg-background rounded-lg overflow-hidden p-4 flex items-start transform hover:bg-stone-700 transition-colors duration-300 ease-in-out cursor-pointer">
                 <div className="w-12 text-center text-2xl font-bold text-gray-400 pt-2">{index + 1}</div>
                 <div className="w-24 h-36 relative flex-shrink-0">
                   <Image 

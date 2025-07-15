@@ -1,15 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { user, login, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    // If the authentication check is done and the user is logged in, redirect
+    if (!authLoading && user) {
+      router.push('/');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,13 +29,13 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ login: loginIdentifier, password }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        router.push('/'); // Redirect to home page on successful login
+        login(data.user);
       } else {
-        const data = await res.json();
         setError(data.message || 'Failed to login');
       }
     } catch (err) {
@@ -36,25 +45,31 @@ export default function LoginPage() {
     }
   };
 
+  // Don't render the form if the user is logged in (to avoid flash of content)
+  if (authLoading || user) {
+    return null; // Or a loading spinner
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md p-8 space-y-6 bg-stone-800 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-white">Login to Kentar</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
-              htmlFor="username"
+              htmlFor="login"
               className="text-sm font-medium text-gray-300"
             >
-              Username
+              Username or Email
             </label>
             <input
-              id="username"
+              id="login"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={loginIdentifier}
+              onChange={(e) => setLoginIdentifier(e.target.value)}
               required
               className="w-full px-3 py-2 mt-1 text-white bg-stone-700 border border-stone-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Username or Email"
             />
           </div>
           <div>
@@ -71,6 +86,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full px-3 py-2 mt-1 text-white bg-stone-700 border border-stone-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Password"
             />
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}

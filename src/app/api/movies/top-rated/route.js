@@ -10,26 +10,50 @@ export async function GET() {
     }
   };
 
+  if (!token) {
+    console.error('TMDB_API_TOKEN is not set in the environment variables.');
+    return NextResponse.json({ message: "Server configuration error: Missing API token." }, { status: 500 });
+  }
+
   try {
-    let allMovies = [];
+    // Create an array of page numbers to fetch
+    const pagesToFetch = Array.from({ length: 15 }, (_, i) => i + 1);
+
+    // Create an array of fetch promises
+    const fetchPromises = pagesToFetch.map(page =>
+      fetch(`https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=${page}`, options)
+        .then(res => {
+          if (!res.ok) {
+            // If any request fails, we'll know which one and why
+            throw new Error(`Failed to fetch page ${page}: ${res.statusText}`);
+          }
+          return res.json();
+        })
+    );
+
+    // Wait for all promises to resolve
+    const pagesData = await Promise.all(fetchPromises);
+
+    const allMovies = [];
     const movieIds = new Set();
-    // Fetch 15 pages to get approximately 300 movies
-    for (let page = 1; page <= 15; page++) {
-      const response = await fetch(`https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=${page}`, options);
-      const data = await response.json();
-      if (data.results) {
-        data.results.forEach(movie => {
+
+    // Process the results from all pages
+    pagesData.forEach(pageData => {
+      if (pageData.results) {
+        pageData.results.forEach(movie => {
           if (!movieIds.has(movie.id)) {
             movieIds.add(movie.id);
             allMovies.push(movie);
           }
         });
       }
-    }
-    
+    });
+
     return NextResponse.json(allMovies);
 
   } catch (error) {
-    return NextResponse.json({ message: "Error fetching data" }, { status: 500 });
+    console.error("Error fetching top-rated movies:", error.message);
+    // Send a more specific error message to the client
+    return NextResponse.json({ message: "Error fetching data from TMDB.", details: error.message }, { status: 500 });
   }
 }

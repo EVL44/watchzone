@@ -4,14 +4,21 @@ import { comparePassword, createToken } from '@/lib/auth';
 
 export async function POST(request) {
   try {
-    const { username, password } = await request.json();
+    // The login identifier can be either a username or an email
+    const { login, password } = await request.json();
 
-    if (!username || !password) {
-      return NextResponse.json({ message: 'Username and password are required' }, { status: 400 });
+    if (!login || !password) {
+      return NextResponse.json({ message: 'Username/email and password are required' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username },
+    // Find the user by either their unique username or unique email
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: login },
+          { email: login },
+        ],
+      },
     });
 
     if (!user) {
@@ -24,7 +31,10 @@ export async function POST(request) {
     }
 
     const token = createToken(user);
-    const response = NextResponse.json({ message: 'Login successful' }, { status: 200 });
+    const response = NextResponse.json({
+      message: 'Login successful',
+      user: { id: user.id, username: user.username, email: user.email, avatarUrl: user.avatarUrl },
+    }, { status: 200 });
 
     response.cookies.set('token', token, {
       httpOnly: true,
