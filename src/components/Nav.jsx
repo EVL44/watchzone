@@ -22,14 +22,14 @@ export default function Nav() {
 
             {/* Center: Desktop Search Bar */}
             <div className="hidden md:flex flex-grow max-w-xl mx-4">
-              <div className="relative w-full text-gray-400 focus-within:text-primary">
+              <div className="relative w-full text-gray-900 focus-within:text-primary">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                   <FaSearch />
                 </span>
                 <input
                   type="text"
                   placeholder="Search for a movie, tv show, person..."
-                  className="w-full bg-stone-800 text-white placeholder-gray-500 border border-transparent rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  className="w-full bg-stone-100 text-primary placeholder-gray-500 border border-transparent rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 />
               </div>
             </div>
