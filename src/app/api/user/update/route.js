@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt';
 import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
   try {
     const token = request.cookies.get('token')?.value;

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
 const jwtSecret = process.env.JWT_SECRET || 'your-default-secret';
 
 export async function GET() {
