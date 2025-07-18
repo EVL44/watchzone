@@ -64,7 +64,7 @@ export default function Nav() {
       <nav className="bg-background shadow-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="text-xl font-bold text-primary flex">Kentar</Link>
+            <Link href="/" className="text-xl font-bold text-primary">Kentar</Link>
             <div className="hidden md:flex flex-grow max-w-xl mx-4 relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-foreground/50"><FaSearch /></span>
               <input type="text" placeholder="Search for a movie, tv show..." className={searchInputClassName} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearch}/>
