@@ -1,51 +1,56 @@
 @import "tailwindcss";
 
+/* Define CSS variables for themes */
 :root {
+  /* Light Theme (default) */
   --background: white;
-  --foreground: #1c1917;
+  --foreground: #0c0a09;
   --primary: #5170ff;
-  --secondary: black;
-  --surface: #5170ff;
+  --secondary: #f3f4f6; /* Light gray for secondary elements */
+  --surface: #ffffff; /* Surface for cards */
+  --font-jetBrains-mono: "JetBrains Mono", monospace;
 }
 
-@theme inline {
+.dark {
+  /* Dark Theme */
+  --background: #0c0a09;
+  --foreground: #ededed;
+  --primary: #5170ff;
+  --secondary: #292524; /* Dark gray for secondary elements */
+  --surface: #1c1917; /* Dark surface for cards */
+}
+
+/* Use Tailwind's @theme to apply your variables */
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
+  --color-surface: var(--surface);
   --font-mono: var(--font-jetBrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --secondary: white;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-jetBrains-mono), sans-serif;
+  background-color: theme('colors.background');
+  color: theme('colors.foreground');
+  font-family: theme('fontFamily.mono');
 }
 
 .jfront-jet {
-  font-family: var(--font-jetBrains-mono), sans-serif;
+  font-family: theme('fontFamily.mono');
 }
-
 
 /* Custom Scrollbar Styles */
 .custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
+  height: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4a4a4a;
+  background: #555;
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #5a5a5a;
+  background: #777;
 }

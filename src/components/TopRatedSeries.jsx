@@ -5,31 +5,28 @@ import Image from 'next/image';
 import { FaStar } from 'react-icons/fa';
 import Link from 'next/link';
 
-export default function TopRatedMovies() {
-  const [movies, setMovies] = useState([]);
+export default function TopRatedSeries() {
+  const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchSeries = async () => {
       try {
-        const response = await fetch('/api/movies/top-rated');
+        const response = await fetch('/api/series/top-rated');
         if (!response.ok) {
-          throw new Error('Failed to fetch top rated movies');
+          throw new Error('Failed to fetch top rated series');
         }
         const data = await response.json();
-        
         if (Array.isArray(data)) {
-          setMovies(data);
+          setSeries(data);
         }
-
       } catch (error) {
-        console.error("Failed to fetch top rated movies:", error);
+        console.error("Failed to fetch top rated series:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchMovies();
+    fetchSeries();
   }, []);
 
   if (loading) {
@@ -54,28 +51,29 @@ export default function TopRatedMovies() {
   return (
     <div className="max-w-4xl mx-auto">
       <ul className="space-y-4">
-        {movies.map((movie, index) => (
-          <li key={movie.id}>
-            <Link href={`/movie/${movie.id}`}>
+        {series.map((item, index) => (
+          <li key={item.id}>
+            {/* FIX: The link now correctly points to the '/serie/' path */}
+            <Link href={`/serie/${item.id}`}>
               <div className="bg-background rounded-lg overflow-hidden p-4 flex items-start transform hover:bg-secondary transition-colors duration-300 ease-in-out cursor-pointer group">
-                <div className="w-12 text-center text-2xl font-bold text-gray-500 pt-2">{index + 1}</div>
-                <div className="w-24 h-36 relative flex-shrink-0">
+                <div className="w-12 text-center text-2xl font-bold text-gray-400 pt-2 flex-shrink-0">{index + 1}</div>
+                <div className="w-24 h-36 relative flex-shrink-0 ml-4">
                   <Image 
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                    alt={movie.title}
+                    src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                    alt={item.name}
                     layout="fill"
                     objectFit="cover"
                     className="rounded-md"
                   />
                 </div>
                 <div className="flex-1 ml-4">
-                  <h3 className="text-foreground font-bold text-xl group-hover:text-primary transition-colors">{movie.title}</h3>
-                  <p className="text-gray-500 text-sm mt-1">{new Date(movie.release_date).getFullYear()}</p>
-                  <p className="text-gray-500 text-sm mt-2 line-clamp-3">{movie.overview}</p>
+                  <h3 className="text-foreground font-bold text-xl group-hover:text-primary transition-colors">{item.name}</h3>
+                  <p className="text-gray-500 text-sm mt-1">{item.first_air_date ? new Date(item.first_air_date).getFullYear() : 'N/A'}</p>
+                  <p className="text-gray-500 text-sm mt-2 line-clamp-3">{item.overview}</p>
                 </div>
                 <div className="flex items-center gap-2 text-xl pl-4">
                   <FaStar className="text-yellow-400" />
-                  <span className="text-foreground font-bold">{movie.vote_average.toFixed(1)}</span>
+                  <span className="text-foreground font-bold">{item.vote_average.toFixed(1)}</span>
                 </div>
               </div>
             </Link>

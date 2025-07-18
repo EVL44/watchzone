@@ -16,10 +16,14 @@ model User {
   password        String
   email           String       @unique
   avatarUrl       String?
-  favoriteIds     String[]     @db.ObjectId
-  watchlistIds    String[]     @db.ObjectId
-  favorites       Movie[]      @relation("Favorites", fields: [favoriteIds], references: [id])
-  watchlist       Movie[]      @relation("Watchlist", fields: [watchlistIds], references: [id])
+  favoriteMovieIds  String[]     @db.ObjectId
+  watchlistMovieIds String[]     @db.ObjectId
+  favoriteSeriesIds String[]     @db.ObjectId
+  watchlistSeriesIds String[]    @db.ObjectId
+  favoriteMovies    Movie[]      @relation("FavoriteMovies", fields: [favoriteMovieIds], references: [id])
+  watchlistMovies   Movie[]      @relation("WatchlistMovies", fields: [watchlistMovieIds], references: [id])
+  favoriteSeries    Series[]     @relation("FavoriteSeries", fields: [favoriteSeriesIds], references: [id])
+  watchlistSeries   Series[]     @relation("WatchlistSeries", fields: [watchlistSeriesIds], references: [id])
   movieLists      MovieList[]
 }
 
@@ -31,10 +35,22 @@ model Movie {
   releaseDate        String?
   favoritedByIds     String[]     @db.ObjectId
   watchlistedByIds   String[]     @db.ObjectId
-  favoritedBy        User[]       @relation("Favorites", fields: [favoritedByIds], references: [id])
-  watchlistedBy      User[]       @relation("Watchlist", fields: [watchlistedByIds], references: [id])
+  favoritedBy        User[]       @relation("FavoriteMovies", fields: [favoritedByIds], references: [id])
+  watchlistedBy      User[]       @relation("WatchlistMovies", fields: [watchlistedByIds], references: [id])
   lists              MovieList[]  @relation(fields: [listIds], references: [id])
   listIds            String[]     @db.ObjectId
+}
+
+model Series {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  tmdbId             Int      @unique
+  name               String
+  posterPath         String?
+  firstAirDate       String?
+  favoritedByIds     String[] @db.ObjectId
+  watchlistedByIds   String[] @db.ObjectId
+  favoritedBy        User[]   @relation("FavoriteSeries", fields: [favoritedByIds], references: [id])
+  watchlistedBy      User[]   @relation("WatchlistSeries", fields: [watchlistedByIds], references: [id])
 }
 
 model MovieList {

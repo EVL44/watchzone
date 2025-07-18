@@ -1,30 +1,27 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { hashPassword, createToken } from '@/lib/auth';
+import bcrypt from 'bcrypt';
+import prisma from '@/lib/prisma';
 
 export async function POST(request) {
   try {
     const { username, email, password } = await request.json();
 
     if (!username || !email || !password) {
-      return NextResponse.json({ message: 'Username, email, and password are required' }, { status: 400 });
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
-
+    
+    // Check if user already exists
     const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { username },
-          { email },
-        ],
-      },
+      where: { OR: [{ email: email }, { username: username }] },
     });
 
     if (existingUser) {
-      return NextResponse.json({ message: 'Username or email already exists' }, { status: 409 });
+      const field = existingUser.email === email ? 'Email' : 'Username';
+      return NextResponse.json({ message: `${field} is already taken` }, { status: 409 });
     }
 
-    const hashedPassword = await hashPassword(password);
-
+    // Hash password and create user
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
         username,
@@ -33,23 +30,10 @@ export async function POST(request) {
       },
     });
 
-    const token = createToken(user);
-    const response = NextResponse.json({
-      message: 'User created and logged in successfully',
-      user: { id: user.id, username: user.username, email: user.email },
-    }, { status: 201 });
+    return NextResponse.json({ message: 'User created successfully' }, { status: 201 });
 
-    response.cookies.set('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 60 * 60, // 1 hour
-    });
-
-    return response;
   } catch (error) {
-    console.error('Signup error:', error);
-    return NextResponse.json({ message: 'An error occurred during signup' }, { status: 500 });
+    console.error('Signup Error:', error); // Log the actual error on the server
+    return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
   }
 }

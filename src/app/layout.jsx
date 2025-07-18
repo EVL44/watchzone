@@ -1,11 +1,12 @@
 import { JetBrains_Mono } from "next/font/google";
 import Nav from "../components/Nav";
 import "./globals.css";
-import { AuthProvider } from '../context/AuthContext'; // Import AuthProvider
+import { Providers } from './providers';
+import Script from "next/script";
 
 const jetBrains_mono = JetBrains_Mono({
   subsets: ['latin'],
-  weight: '400',
+  weight: ['400', '700'],
   variable: '--font-jetBrains-mono',
 });
 
@@ -17,16 +18,19 @@ export const metadata = {
   }
 };
 
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${jetBrains_mono.variable}`} >
-        <AuthProvider> {/* Add AuthProvider here */}
+    <html lang="en" suppressHydrationWarning>
+      <body className={jetBrains_mono.variable}>
+        <Providers>
           <Nav />
-          <main className="p-4 sm:p-6 lg:p-8">
+          <main>
             {children}
           </main>
-        </AuthProvider> {/* Close AuthProvider */}
+        </Providers>
+        {/* The Cloudinary script is essential for the upload widget to function */}
+        <Script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript" strategy="beforeInteractive" />
       </body>
     </html>
   );

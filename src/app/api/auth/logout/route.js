@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function POST() {
-  const cookieStore = cookies();
+  const response = NextResponse.json({ message: 'Logout successful' });
 
-  // Clear the token cookie by setting its maxAge to 0
-  cookieStore.set('token', '', {
+  // Set the cookie with an immediate expiration date to clear it
+  response.cookies.set('token', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
+    expires: new Date(0), // Set to a past date
     path: '/',
-    maxAge: 0,
   });
 
-  return NextResponse.json({ message: 'Logout successful' }, { status: 200 });
+  return response;
 }
