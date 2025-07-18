@@ -13,10 +13,29 @@ export default function Nav() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isTopRatedOpen, setIsTopRatedOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [recommendations, setRecommendations] = useState({ keywords: [], collections: [] });
   const router = useRouter();
   const { user, logout, loading } = useAuth();
   const profileRef = useRef(null);
   const topRatedRef = useRef(null);
+
+ useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (searchQuery.length > 2) {
+        const response = await fetch(`/api/search?query=${searchQuery}&recommendations=true`);
+        const data = await response.json();
+        setRecommendations(data);
+      } else {
+        setRecommendations({ keywords: [], collections: [] });
+      }
+    };
+
+    const debounce = setTimeout(() => {
+      fetchRecommendations();
+    }, 300);
+
+    return () => clearTimeout(debounce);
+  }, [searchQuery]);
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
@@ -45,10 +64,16 @@ export default function Nav() {
       <nav className="bg-background shadow-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="text-xl font-bold text-primary">Kentar</Link>
+            <Link href="/" className="text-xl font-bold text-primary flex">Kentar</Link>
             <div className="hidden md:flex flex-grow max-w-xl mx-4 relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-foreground/50"><FaSearch /></span>
               <input type="text" placeholder="Search for a movie, tv show..." className={searchInputClassName} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearch}/>
+              {(recommendations.keywords.length > 0 || recommendations.collections.length > 0) && (
+                <div className="absolute top-full mt-2 w-full bg-surface rounded-md shadow-lg z-10">
+                  {recommendations.keywords.map(kw => <div key={kw.id} className="px-4 py-2 hover:bg-secondary cursor-pointer" onClick={() => { router.push(`/search?query=${kw.name}`); setSearchQuery(''); }}>{kw.name}</div>)}
+                  {recommendations.collections.map(col => <div key={col.id} className="px-4 py-2 hover:bg-secondary cursor-pointer" onClick={() => { router.push(`/search?query=${col.name}`); setSearchQuery(''); }}>{col.name}</div>)}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center gap-2">

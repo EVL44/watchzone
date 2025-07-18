@@ -4,12 +4,12 @@ import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaStar } from 'react-icons/fa';
+import { FaStar, FaTv, FaFilm } from 'react-icons/fa';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
-  const [movies, setMovies] = useState([]);
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,12 +18,12 @@ export default function SearchPage() {
       return;
     }
 
-    const fetchMovies = async () => {
+    const fetchResults = async () => {
       try {
         setLoading(true);
         const response = await fetch(`/api/search?query=${query}`);
         const data = await response.json();
-        setMovies(data);
+        setResults(data);
       } catch (error) {
         console.error("Failed to fetch search results:", error);
       } finally {
@@ -31,59 +31,57 @@ export default function SearchPage() {
       }
     };
 
-    fetchMovies();
+    fetchResults();
   }, [query]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-white text-2xl">Searching...</p>
+        <p className="text-foreground text-2xl">Searching...</p>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-extrabold text-white text-center mb-12">
-        Search Results for "{query}"
+      <h1 className="text-3xl font-extrabold text-foreground text-center mb-12">
+        Search Results for "<span className='text-primary font-bold'>{query}</span>"
       </h1>
-      {movies.length > 0 ? (
+      {results.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {movies.map((movie) => {
-            // --- FIX STARTS HERE ---
-            // 1. Check if release_date exists and is valid before creating a Date object.
-            const releaseYear = movie.release_date && !isNaN(new Date(movie.release_date))
-              ? new Date(movie.release_date).getFullYear()
+          {results.map((item) => {
+            const isMovie = item.media_type === 'movie';
+            const title = isMovie ? item.title : item.name;
+            const releaseDate = isMovie ? item.release_date : item.first_air_date;
+            const releaseYear = releaseDate && !isNaN(new Date(releaseDate))
+              ? new Date(releaseDate).getFullYear()
               : 'N/A';
+            const posterPath = item.poster_path
+              ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+              : '/placeholder-image.png';
 
-            // 2. Provide a fallback for the poster path if it's null.
-            const posterPath = movie.poster_path
-              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-              : '/placeholder-image.png'; // Make sure you have a placeholder image in your public folder
-            // --- FIX ENDS HERE ---
-
-            // Only render the movie card if it has a poster
-            if (!movie.poster_path) {
+            if (!item.poster_path) {
               return null;
             }
 
             return (
-              <Link href={`/movie/${movie.id}`} key={movie.id}>
-                <div className="bg-stone-800 rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer">
+              <Link href={`/${isMovie ? 'movie' : 'serie'}/${item.id}`} key={`${item.id}-${item.media_type}`}>
+                <div className="bg-secondary rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer">
                   <Image
                     src={posterPath}
-                    alt={movie.title}
+                    alt={title}
                     width={500}
                     height={750}
                     className="w-full h-auto"
                   />
                   <div className="p-4">
-                    <h3 className="text-white font-bold text-lg truncate">{movie.title}</h3>
+                    <h3 className="text-foreground font-bold text-lg truncate">{title}</h3>
                     <div className="flex items-center justify-between text-gray-400 text-sm mt-2">
                       <span>{releaseYear}</span>
                       <div className="flex items-center gap-1">
-                        <FaStar className="text-yellow-400" />
-                        <span>{movie.vote_average.toFixed(1)}</span>
+                        {isMovie ? <FaFilm /> : <FaTv />}
+                        <FaStar className="text-yellow-400 ml-2" />
+                        <span>{item.vote_average.toFixed(1)}</span>
                       </div>
                     </div>
                   </div>
@@ -93,7 +91,7 @@ export default function SearchPage() {
           })}
         </div>
       ) : (
-        <p className="text-center text-gray-400">No results found for "{query}".</p>
+        <p className="text-center text-gray-500">No results found for "{query}".</p>
       )}
     </div>
   );
