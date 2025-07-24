@@ -5,7 +5,7 @@ import Trending from "../components/Trending";
 export default function Home() {
   return (
     <>
-      <div className="relative h-[60vh] flex items-center justify-center text-white text-center px-4 bg-cover bg-center" style={{ backgroundImage: "url('/jhon_wick.jpg')" }}>
+      <div className="relative h-[60vh] flex items-center justify-center text-white text-center px-4 bg-cover bg-fixed  bg-center" style={{ backgroundImage: "url('/jhon_wick.jpg')" }}>
         <div className="absolute inset-0 bg-primary opacity-40"></div>
         <div className="relative z-10">
           <h1 className="text-5xl md:text-6xl font-extrabold">Welcome to Kentar</h1>
