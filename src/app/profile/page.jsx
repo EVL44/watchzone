@@ -1,32 +1,17 @@
+// src/app/profile/page.jsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext'; // CORRECTED IMPORT PATH
 import Image from 'next/image';
-import Link from 'next/link';
 import UploadWidget from '@/components/UploadWidget';
 import { FaUserCircle, FaEdit, FaHeart, FaListAlt } from 'react-icons/fa';
-
-const MediaListComponent = ({ title, items, type }) => (
-  <div>
-    <h2 className="text-2xl font-bold mb-4">{title}</h2>
-    {items && items.length > 0 ? (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {items.map(item => (
-          <Link href={`/${type}/${item.tmdbId}`} key={item.id}>
-            <div className="relative aspect-[2/3] rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-              <Image src={`https://image.tmdb.org/t/p/w500${item.posterPath}`} alt={item.title || item.name} layout="fill" objectFit="cover" />
-            </div>
-          </Link>
-        ))}
-      </div>
-    ) : <p className="text-foreground text-opacity-70">No items in this list yet.</p>}
-  </div>
-);
+import MediaGrid from '@/components/MediaGrid';
 
 export default function ProfilePage() {
-  const { user, loading, updateUserContext } = useAuth(); // FIX: Changed setUser to updateUserContext
+  const { user, loading, updateUserContext } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('favorites');
   const [username, setUsername] = useState('');
@@ -54,7 +39,7 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      updateUserContext(data); // FIX: Changed setUser to updateUserContext
+      updateUserContext(data);
       setMessage({ type: 'success', text: 'Update successful!' });
       if (payload.password) setPassword('');
     } catch (error) {
@@ -72,6 +57,9 @@ export default function ProfilePage() {
   };
 
   if (loading || !user) return <div className="text-center py-20 text-foreground">Loading...</div>;
+
+  const combinedFavorites = [...(user.favoriteMovies || []), ...(user.favoriteSeries || [])];
+  const combinedWatchlist = [...(user.watchlistMovies || []), ...(user.watchlistSeries || [])];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -107,29 +95,23 @@ export default function ProfilePage() {
                 <form onSubmit={handleFormSubmit} className="space-y-6">
                     <div>
                         <label className="block mb-2 font-medium">Username</label>
-                        <input type="text" value={username} onChange={e => setUsername(e.target.value)} className="w-full bg-secondary p-3 rounded-md border-border focus:ring-2 focus:ring-primary focus:outline-none" />
+                        <input type="text" value={username} onChange={e => setUsername(e.target.value)} className="w-full bg-secondary p-3 rounded-md focus:ring-2 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
                         <label className="block mb-2 font-medium">Email</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-secondary p-3 rounded-md border-border focus:ring-2 focus:ring-primary focus:outline-none" />
+                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-secondary p-3 rounded-md focus:ring-2 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
                         <label className="block mb-2 font-medium">New Password</label>
-                        <input type="password" placeholder="Leave blank to keep current" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-secondary p-3 rounded-md border-border focus:ring-2 focus:ring-primary focus:outline-none" />
+                        <input type="password" placeholder="Leave blank to keep current" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-secondary p-3 rounded-md focus:ring-2 focus:ring-primary focus:outline-none" />
                     </div>
                     <button type="submit" disabled={isUpdating} className="bg-primary text-white px-6 py-3 rounded-md hover:bg-opacity-80 disabled:bg-opacity-50 transition-colors">{isUpdating ? 'Saving...' : 'Save Changes'}</button>
                     {message.text && <p className={`mt-4 text-sm ${message.type === 'error' ? 'text-red-500' : 'text-green-500'}`}>{message.text}</p>}
                 </form>
               </div>
             )}
-            {activeTab === 'favorites' && <>
-              <MediaListComponent title="Favorite Movies" items={user.favoriteMovies} type="movie" />
-              <div className="mt-8"><MediaListComponent title="Favorite Series" items={user.favoriteSeries} type="serie" /></div>
-            </>}
-            {activeTab === 'watchlist' && <>
-              <MediaListComponent title="Movie Watchlist" items={user.watchlistMovies} type="movie" />
-              <div className="mt-8"><MediaListComponent title="Series Watchlist" items={user.watchlistSeries} type="serie" /></div>
-            </>}
+            {activeTab === 'favorites' && <MediaGrid items={combinedFavorites} title="My Favorites" />}
+            {activeTab === 'watchlist' && <MediaGrid items={combinedWatchlist} title="My Watchlist" />}
           </div>
         </main>
       </div>

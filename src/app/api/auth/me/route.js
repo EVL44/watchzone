@@ -18,7 +18,7 @@ export async function GET() {
     const decoded = jwt.verify(token, jwtSecret);
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      include: { // **CRITICAL FIX**: Include the full movie and series objects
+      include: {
         favoriteMovies: true,
         watchlistMovies: true,
         favoriteSeries: true,
@@ -30,7 +30,6 @@ export async function GET() {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
     
-    // We don't want to send the password hash to the client
     const { password, ...userWithoutPassword } = user;
 
     return NextResponse.json(userWithoutPassword);

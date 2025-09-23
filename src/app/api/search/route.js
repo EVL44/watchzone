@@ -1,5 +1,5 @@
-// src/app/api/search/route.js
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma'; // Import prisma
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -20,42 +20,58 @@ export async function GET(request) {
   };
 
   try {
-    // Logic for fetching search recommendations for the search bar dropdown
+    // --- Updated Recommendations Logic ---
     if (recommendations) {
-      const [keywordsResponse, collectionsResponse] = await Promise.all([
-        fetch(`https://api.themoviedb.org/3/search/keyword?query=${encodeURIComponent(query)}&page=1`, options),
-        fetch(`https://api.themoviedb.org/3/search/collection?query=${encodeURIComponent(query)}&page=1`, options)
-      ]);
-      const keywordsData = await keywordsResponse.json();
-      const collectionsData = await collectionsResponse.json();
-      
-      return NextResponse.json({ 
-        keywords: keywordsData.results.slice(0, 5), 
-        collections: collectionsData.results.slice(0, 5) 
+      // Search for users in our database
+      const users = await prisma.user.findMany({
+        where: {
+          username: {
+            contains: query,
+            mode: 'insensitive', // Case-insensitive search
+          },
+        },
+        select: {
+          id: true,
+          username: true,
+        },
+        take: 5,
       });
+
+      return NextResponse.json({ users });
     }
 
-    // --- FIX: Re-added the main search logic ---
-    // Fetch both movies and series for the main search results page
-    const [movieResponse, seriesResponse] = await Promise.all([
+    // --- Main Search Logic (Movies, Series, and Users) ---
+    const [movieResponse, seriesResponse, usersResponse] = await Promise.all([
       fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`, options),
-      fetch(`https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`, options)
+      fetch(`https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`, options),
+      prisma.user.findMany({
+        where: {
+          username: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+        select: {
+          id: true,
+          username: true,
+          avatarUrl: true,
+        },
+        take: 20,
+      }),
     ]);
 
     const movieData = await movieResponse.json();
     const seriesData = await seriesResponse.json();
 
-    // Add a media_type to distinguish between movies and series
     const movies = movieData.results.map(item => ({ ...item, media_type: 'movie' }));
     const series = seriesData.results.map(item => ({ ...item, media_type: 'tv' }));
+    const users = usersResponse.map(item => ({...item, media_type: 'user'}));
 
-    const results = [...movies, ...series];
-
-    // Sort results by popularity
-    results.sort((a, b) => b.popularity - a.popularity);
+    // Combine and sort results (you might want a more sophisticated sorting logic)
+    const results = [...users, ...movies, ...series];
+    results.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
 
     return NextResponse.json(results);
-    // --- End of FIX ---
 
   } catch (error) {
     console.error("Search API Error:", error);

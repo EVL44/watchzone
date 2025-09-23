@@ -2,6 +2,7 @@ import { JetBrains_Mono } from "next/font/google";
 import Nav from "../components/Nav";
 import "./globals.css";
 import { Providers } from './providers';
+import Footer from "../components/Footer";
 import Script from "next/script";
 
 const jetBrains_mono = JetBrains_Mono({
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
           <main>
             {children}
           </main>
+          <Footer />
         </Providers>
         {/* The Cloudinary script is essential for the upload widget to function */}
         <Script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript" strategy="beforeInteractive" />

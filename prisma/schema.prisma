@@ -11,53 +11,71 @@ datasource db {
 }
 
 model User {
-  id              String       @id @default(auto()) @map("_id") @db.ObjectId
-  username        String       @unique
-  password        String
-  email           String       @unique
-  avatarUrl       String?
-  favoriteMovieIds  String[]     @db.ObjectId
-  watchlistMovieIds String[]     @db.ObjectId
-  favoriteSeriesIds String[]     @db.ObjectId
-  watchlistSeriesIds String[]    @db.ObjectId
-  favoriteMovies    Movie[]      @relation("FavoriteMovies", fields: [favoriteMovieIds], references: [id])
-  watchlistMovies   Movie[]      @relation("WatchlistMovies", fields: [watchlistMovieIds], references: [id])
-  favoriteSeries    Series[]     @relation("FavoriteSeries", fields: [favoriteSeriesIds], references: [id])
-  watchlistSeries   Series[]     @relation("WatchlistSeries", fields: [watchlistSeriesIds], references: [id])
-  movieLists      MovieList[]
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  username           String     @unique
+  password           String
+  email              String     @unique
+  avatarUrl          String?
+  favoriteMovieIds   String[]   @db.ObjectId
+  watchlistMovieIds  String[]   @db.ObjectId
+  favoriteSeriesIds  String[]   @db.ObjectId
+  watchlistSeriesIds String[]   @db.ObjectId
+  favoriteMovies     Movie[]    @relation("FavoriteMovies", fields: [favoriteMovieIds], references: [id])
+  watchlistMovies    Movie[]    @relation("WatchlistMovies", fields: [watchlistMovieIds], references: [id])
+  favoriteSeries     Series[]   @relation("FavoriteSeries", fields: [favoriteSeriesIds], references: [id])
+  watchlistSeries    Series[]   @relation("WatchlistSeries", fields: [watchlistSeriesIds], references: [id])
+  playlists          Playlist[]
+  followers          Follow[]   @relation("Following")
+  following          Follow[]   @relation("Follower")
 }
 
 model Movie {
-  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
-  tmdbId             Int          @unique
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  tmdbId             Int        @unique
   title              String
   posterPath         String?
   releaseDate        String?
-  favoritedByIds     String[]     @db.ObjectId
-  watchlistedByIds   String[]     @db.ObjectId
-  favoritedBy        User[]       @relation("FavoriteMovies", fields: [favoritedByIds], references: [id])
-  watchlistedBy      User[]       @relation("WatchlistMovies", fields: [watchlistedByIds], references: [id])
-  lists              MovieList[]  @relation(fields: [listIds], references: [id])
-  listIds            String[]     @db.ObjectId
+  favoritedByIds     String[]   @db.ObjectId
+  watchlistedByIds   String[]   @db.ObjectId
+  favoritedBy        User[]     @relation("FavoriteMovies", fields: [favoritedByIds], references: [id])
+  watchlistedBy      User[]     @relation("WatchlistMovies", fields: [watchlistedByIds], references: [id])
+  playlists          Playlist[] @relation("PlaylistMovies", fields: [playlistIds], references: [id])
+  playlistIds        String[]   @db.ObjectId
 }
 
 model Series {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
-  tmdbId             Int      @unique
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  tmdbId             Int        @unique
   name               String
   posterPath         String?
   firstAirDate       String?
-  favoritedByIds     String[] @db.ObjectId
-  watchlistedByIds   String[] @db.ObjectId
-  favoritedBy        User[]   @relation("FavoriteSeries", fields: [favoritedByIds], references: [id])
-  watchlistedBy      User[]   @relation("WatchlistSeries", fields: [watchlistedByIds], references: [id])
+  favoritedByIds     String[]   @db.ObjectId
+  watchlistedByIds   String[]   @db.ObjectId
+  favoritedBy        User[]     @relation("FavoriteSeries", fields: [favoritedByIds], references: [id])
+  watchlistedBy      User[]     @relation("WatchlistSeries", fields: [watchlistedByIds], references: [id])
+  playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id])
+  playlistIds        String[]   @db.ObjectId
 }
 
-model MovieList {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @db.ObjectId
-  movies    Movie[]  @relation(fields: [movieIds], references: [id])
-  movieIds  String[] @db.ObjectId
+model Playlist {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.ObjectId
+  movies      Movie[]  @relation("PlaylistMovies", fields: [movieIds], references: [id])
+  movieIds    String[] @db.ObjectId
+  series      Series[] @relation("PlaylistSeries", fields: [seriesIds], references: [id])
+  seriesIds   String[] @db.ObjectId
 }
+
+model Follow {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  follower    User   @relation("Follower", fields: [followerId], references: [id])
+  followerId  String @db.ObjectId
+  following   User   @relation("Following", fields: [followingId], references: [id])
+  followingId String @db.ObjectId
+
+  @@unique([followerId, followingId])
+}
+
