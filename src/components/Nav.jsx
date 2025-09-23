@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaBars, FaSearch, FaTimes, FaAngleDown } from 'react-icons/fa';
+import { FaBars, FaSearch, FaTimes, FaAngleDown, FaUserCircle, FaFilm, FaTv } from 'react-icons/fa';
 import { User, Settings, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +27,7 @@ export default function Nav() {
         const response = await fetch(`/api/search?query=${searchQuery}&recommendations=true`);
         if (response.ok) {
             const data = await response.json();
-            setRecommendations(data.users || []);
+            setRecommendations(data || []);
         }
       } else {
         setRecommendations([]);
@@ -64,8 +64,14 @@ export default function Nav() {
     }
   };
 
-  const handleRecommendationClick = (username) => {
-    router.push(`/user/${username}`);
+  const handleRecommendationClick = (item) => {
+    if (item.media_type === 'user') {
+      router.push(`/user/${item.name}`);
+    } else if (item.media_type === 'movie') {
+      router.push(`/movie/${item.id}`);
+    } else if (item.media_type === 'tv') {
+      router.push(`/serie/${item.id}`);
+    }
     setSearchQuery('');
     setRecommendations([]);
     if (isMenuOpen) setIsMenuOpen(false);
@@ -89,9 +95,22 @@ export default function Nav() {
               <input type="text" placeholder="Search for movies, series, users..." className={searchInputClassName} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearch}/>
               {recommendations.length > 0 && (
                 <div className="absolute top-full mt-2 w-full bg-surface rounded-md shadow-lg z-10 py-1">
-                  {recommendations.map(u => (
-                    <div key={u.id} className="px-4 py-2 hover:bg-secondary cursor-pointer text-sm" onClick={() => handleRecommendationClick(u.username)}>
-                      {u.username}
+                  {recommendations.map(item => (
+                    <div key={item.id} className="flex items-center gap-3 px-4 py-2 hover:bg-secondary cursor-pointer text-sm" onClick={() => handleRecommendationClick(item)}>
+                       {item.media_type === 'user' ? (
+                        item.avatarUrl ? (
+                          <Image src={item.avatarUrl} alt={item.name} width={24} height={24} className="rounded-full" />
+                        ) : (
+                          <FaUserCircle className="w-6 h-6 text-foreground/50" />
+                        )
+                       ) : (
+                        item.poster_path ? (
+                          <Image src={`https://image.tmdb.org/t/p/w92${item.poster_path}`} alt={item.name} width={24} height={36} className="rounded-sm" />
+                        ) : (
+                          item.media_type === 'movie' ? <FaFilm className="w-6 h-6 text-foreground/50" /> : <FaTv className="w-6 h-6 text-foreground/50" />
+                        )
+                       )}
+                       <span>{item.name}</span>
                     </div>
                   ))}
                 </div>
@@ -181,7 +200,7 @@ export default function Nav() {
                 <Link href="/top-rated/movies" onClick={closeMenu}><span className="text-foreground hover:bg-secondary block px-3 py-3 rounded-md text-lg font-medium">Top Rated Movies</span></Link>
                 <Link href="/top-rated/series" onClick={closeMenu}><span className="text-foreground hover:bg-secondary block px-3 py-3 rounded-md text-lg font-medium">Top Rated Series</span></Link>
                 <Link href="/login" onClick={closeMenu}><span className="text-foreground hover:bg-secondary block px-3 py-3 rounded-md text-lg font-medium">Login</span></Link>
-                <Link href="/signup" onClick={closeMenu}><span className="text-foreground hover:bg-secondary block px-3 py-3 rounded-md text-lg font-medium">Sign Up</span></Link>
+                <Link href="/signup" className="text-foreground hover:bg-secondary block px-3 py-3 rounded-md text-lg font-medium">Sign Up</Link>
               </>
             )}
           </div>
@@ -190,4 +209,3 @@ export default function Nav() {
     </>
   );
 }
-

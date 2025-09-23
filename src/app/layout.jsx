@@ -23,6 +23,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* AdSense script for connecting the website to your account */}
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738"
+          crossOrigin="anonymous"></script>
+      </head>
       <body className={jetBrains_mono.variable}>
         <Providers>
           <Nav />

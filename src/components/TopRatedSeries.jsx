@@ -39,7 +39,7 @@ export default function TopRatedSeries() {
       }
     };
     fetchAllSeries();
-  }, [user]);
+  }, []); // Removed 'user' from the dependency array
 
   const handleListAction = useCallback(async (serie, listType) => {
     if (!user) return router.push('/login');

@@ -55,6 +55,7 @@ export default async function SerieDetailsPage({ params }) {
 
   if (!serie) return <div className="text-center py-20 text-foreground">Series not found.</div>;
 
+  const creator = serie.created_by?.length > 0 ? serie.created_by[0] : null;
   const cast = serie.credits?.cast.slice(0, 20);
   const backdropUrl = serie.backdrop_path ? `https://image.tmdb.org/t/p/original${serie.backdrop_path}` : '';
   const posterUrl = serie.poster_path ? `https://image.tmdb.org/t/p/w500${serie.poster_path}` : '';
@@ -95,6 +96,7 @@ export default async function SerieDetailsPage({ params }) {
 
             {serie.genres?.length > 0 && <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Genres</h2><div className="flex flex-wrap gap-2">{serie.genres.map(g => <span key={g.id} className="bg-stone-700 text-gray-300 px-3 py-1 rounded-full text-sm">{g.name}</span>)}</div></div>}
             <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Overview</h2><p className="text-gray-500 leading-relaxed">{serie.overview}</p></div>
+            {creator && <div className="mt-6"><h3 className="text-xl font-bold text-foreground">Creator</h3><p className="text-gray-500">{creator.name}</p></div>}
           </div>
         </div>
         {cast?.length > 0 && (

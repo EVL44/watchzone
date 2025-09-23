@@ -39,7 +39,7 @@ export default function TopRatedMovies() {
       }
     };
     fetchAllMovies();
-  }, [user]);
+  }, []); // Removed 'user' from the dependency array
 
   const handleListAction = useCallback(async (movie, listType) => {
     if (!user) return router.push('/login');

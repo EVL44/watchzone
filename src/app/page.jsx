@@ -16,6 +16,21 @@ export default function Home() {
         <div className="mb-16">
           <Trending />
         </div>
+        {/* --- Ad Integration: Responsive Horizontal Ad --- */}
+        <div className="my-8 text-center">
+          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738"
+            crossOrigin="anonymous"></script>
+          <ins className="adsbygoogle"
+            style={{ display: 'block' }}
+            data-ad-client="ca-pub-8121438559622738"
+            data-ad-slot="9786088462"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+          <script>
+            {`(adsbygoogle = window.adsbygoogle || []).push({});`}
+          </script>
+        </div>
+        {/* ------------------------------------------------ */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-foreground mb-6">Popular Movies</h2>
           <PopularMovies />

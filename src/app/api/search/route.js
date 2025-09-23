@@ -22,22 +22,50 @@ export async function GET(request) {
   try {
     // --- Updated Recommendations Logic ---
     if (recommendations) {
-      // Search for users in our database
-      const users = await prisma.user.findMany({
-        where: {
-          username: {
-            contains: query,
-            mode: 'insensitive', // Case-insensitive search
+      const [movieResponse, seriesResponse, usersResponse] = await Promise.all([
+        fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`, options),
+        fetch(`https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`, options),
+        prisma.user.findMany({
+          where: {
+            username: {
+              contains: query,
+              mode: 'insensitive',
+            },
           },
-        },
-        select: {
-          id: true,
-          username: true,
-        },
-        take: 5,
-      });
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+          take: 5,
+        }),
+      ]);
 
-      return NextResponse.json({ users });
+      const movieData = await movieResponse.json();
+      const seriesData = await seriesResponse.json();
+  
+      const movies = movieData.results.slice(0, 5).map(item => ({ 
+        id: item.id,
+        name: item.title,
+        poster_path: item.poster_path,
+        media_type: 'movie' 
+      }));
+      const series = seriesData.results.slice(0, 5).map(item => ({
+        id: item.id,
+        name: item.name,
+        poster_path: item.poster_path,
+        media_type: 'tv' 
+      }));
+      const users = usersResponse.map(item => ({
+        id: item.id,
+        name: item.username,
+        avatarUrl: item.avatarUrl,
+        media_type: 'user'
+      }));
+
+      const allRecommendations = [...users, ...movies, ...series];
+      
+      return NextResponse.json(allRecommendations);
     }
 
     // --- Main Search Logic (Movies, Series, and Users) ---
