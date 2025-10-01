@@ -23,12 +23,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        {process.env.NODE_ENV == 'production' && (
-          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738" crossorigin="anonymous"></script>
-        )}
-      </head>
       <body className={jetBrains_mono.variable}>
+        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738"
+        crossOrigin="anonymous"></Script>
         <Providers>
           <Nav />
           <main>
