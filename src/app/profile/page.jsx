@@ -66,7 +66,7 @@ export default function ProfilePage() {
       <div className="bg-surface p-6 rounded-lg mb-8 md:flex md:items-center">
         <div className="relative w-32 h-32 mx-auto md:mx-0 mb-4 md:mb-0 md:mr-6 flex-shrink-0">
           <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-4xl font-bold text-white overflow-hidden">
-            {user.avatarUrl ? <Image src={user.avatarUrl} alt="Avatar" layout="fill" objectFit="cover" /> : <FaUserCircle />}
+            {user.avatarUrl ? <Image src={user.avatarUrl} alt="Avatar" layout="fill" objectFit="cover" unoptimized={true} /> : <FaUserCircle />}
           </div>
           <UploadWidget onUpload={(url) => handleUpdate({ avatarUrl: url })} />
         </div>

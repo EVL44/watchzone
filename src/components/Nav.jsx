@@ -99,13 +99,13 @@ export default function Nav() {
                     <div key={item.id} className="flex items-center gap-3 px-4 py-2 hover:bg-secondary cursor-pointer text-sm" onClick={() => handleRecommendationClick(item)}>
                        {item.media_type === 'user' ? (
                         item.avatarUrl ? (
-                          <Image src={item.avatarUrl} alt={item.name} width={24} height={24} className="rounded-full" />
+                          <Image src={item.avatarUrl} alt={item.name} width={24} height={24} className="rounded-full" unoptimized={true} />
                         ) : (
                           <FaUserCircle className="w-6 h-6 text-foreground/50" />
                         )
                        ) : (
                         item.poster_path ? (
-                          <Image src={`https://image.tmdb.org/t/p/w92${item.poster_path}`} alt={item.name} width={24} height={36} className="rounded-sm" />
+                          <Image src={`https://image.tmdb.org/t/p/w92${item.poster_path}`} alt={item.name} width={24} height={36} className="rounded-sm" unoptimized={true} />
                         ) : (
                           item.media_type === 'movie' ? <FaFilm className="w-6 h-6 text-foreground/50" /> : <FaTv className="w-6 h-6 text-foreground/50" />
                         )
@@ -136,7 +136,7 @@ export default function Nav() {
                     {/* --- IMPROVED PROFILE DROPDOWN --- */}
                     <div className="relative" ref={profileRef}>
                       <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-primary">
-                        {user.avatarUrl ? <Image src={user.avatarUrl} alt="User Avatar" width={36} height={36} className="w-full h-full rounded-full object-cover" /> : getAvatarInitial()}
+                        {user.avatarUrl ? <Image src={user.avatarUrl} alt="User Avatar" width={36} height={36} className="w-full h-full rounded-full object-cover" unoptimized={true} /> : getAvatarInitial()}
                       </button>
                       {isProfileOpen && (
                         <div className="absolute right-0 mt-2 w-56 bg-surface rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
