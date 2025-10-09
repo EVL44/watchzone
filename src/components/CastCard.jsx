@@ -15,6 +15,7 @@ export default function CastCard({ actor }) {
                     alt={actor.name}
                     layout="fill"
                     objectFit="cover"
+                    unoptimized={true} 
                 />
             ) : (
                 <div className="w-full h-full bg-surface flex items-center justify-center">

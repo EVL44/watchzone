@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
-const jwtSecret = process.env.JWT_SECRET || 'your-default-secret';
 
 export async function GET(request) {
   const token = request.cookies.get('token')?.value;
@@ -13,7 +12,7 @@ export async function GET(request) {
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret);
+    const decoded = await verifyToken(token); // Use the utility function
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       include: {
@@ -32,6 +31,7 @@ export async function GET(request) {
 
     return NextResponse.json(userWithoutPassword);
   } catch (error) {
-    return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+    // Catch errors from verifyToken (e.g., token expired, invalid signature)
+    return NextResponse.json({ message: 'Invalid token or session expired' }, { status: 401 });
   }
 }

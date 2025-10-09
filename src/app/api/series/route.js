@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const token = process.env.TMDB_API_TOKEN;
+  
   if (!token) {
     return NextResponse.json({ message: "TMDB API token not found." }, { status: 500 });
   }

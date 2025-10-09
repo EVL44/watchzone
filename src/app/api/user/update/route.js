@@ -60,13 +60,16 @@ export async function POST(request) {
           create: createPayload,
         });
 
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        const currentList = user[fieldToUpdate] || [];
-        const newList = action === 'add' ? [...currentList, mediaItem.id] : currentList.filter(id => id !== mediaItem.id);
-
+        // **FIX: Use atomic update (push/pull) for array fields**
+        const updateOperation = action === 'add' ? 'push' : 'pull';
+        
         const updatedUser = await prisma.user.update({
           where: { id: userId },
-          data: { [fieldToUpdate]: newList },
+          data: { 
+            [fieldToUpdate]: {
+              [updateOperation]: mediaItem.id // Atomically adds or removes the ID
+            }
+          },
           include: { favoriteMovies: true, watchlistMovies: true, favoriteSeries: true, watchlistSeries: true }
         });
         

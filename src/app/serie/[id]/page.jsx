@@ -64,7 +64,7 @@ export default async function SerieDetailsPage({ params }) {
     <div className="min-h-screen">
       {backdropUrl && (
         <div className="absolute top-0 left-0 w-full h-[60vh] -z-10">
-          <Image src={backdropUrl} alt={`${serie.name} backdrop`} layout="fill" objectFit="cover" className="opacity-80 object-top" />
+          <Image src={backdropUrl} alt={`${serie.name} backdrop`} layout="fill" objectFit="cover" className="opacity-80 object-top" unoptimized={true} />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         </div>
       )}
@@ -73,7 +73,7 @@ export default async function SerieDetailsPage({ params }) {
           <div className="md:w-1/3 flex-shrink-0">
             {posterUrl && (
               <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
-                <Image src={posterUrl} alt={serie.name} layout="fill" objectFit="cover" />
+                <Image src={posterUrl} alt={serie.name} layout="fill" objectFit="cover" unoptimized={true} />
               </div>
             )}
           </div>

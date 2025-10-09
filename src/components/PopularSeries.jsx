@@ -45,11 +45,12 @@ export default function PopularSeries() {
         <Link href={`/serie/${item.id}`} key={item.id}>
           <div className="bg-secondary rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer group">
             <Image 
-              src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-              alt={item.name}
-              width={500}
-              height={750}
-              className="w-full h-auto"
+                src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                alt={item.name}
+                width={500}
+                height={750}
+                className="w-full h-auto"
+                unoptimized={true} 
             />
             <div className="p-4">
               <h3 className="text-foreground font-bold text-lg truncate group-hover:text-primary transition-colors">{item.name}</h3>
