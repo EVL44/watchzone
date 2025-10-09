@@ -7,7 +7,7 @@ export default function TopRatedSeriesPage() {
       <h1 className="text-3xl font-extrabold text-foreground text-center mb-12">
         Top 300 Rated TV Series
       </h1>
-      <div className="my-8">
+      <div className="my-8 w-full flex justify-center">
         <Adsense
             adSlot="9095823329"
             style={{ display: 'block' }}

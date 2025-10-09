@@ -15,7 +15,7 @@ export default function Home() {
       </div>
       <div className="container mx-auto px-4 py-8">
         {/* Horizontal Ad */}
-        <div className="my-8">
+        <div className="my-8 w-full flex justify-center">
           <Adsense
             adSlot="9786088462"
             style={{ display: 'block' }}
@@ -26,7 +26,7 @@ export default function Home() {
         <div className="mb-16">
           <Trending />
         </div>
-        <div className="my-8">
+        <div className="my-8 w-full flex justify-center">
           <Adsense
             adSlot="9786088462"
             style={{ display: 'block' }}
@@ -38,7 +38,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-foreground mb-6">Popular Movies</h2>
           <PopularMovies />
         </div>
-        <div className="my-8">
+        <div className="my-8 w-full flex justify-center">
           <Adsense
             adSlot="9786088462"
             style={{ display: 'block' }}
