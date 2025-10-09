@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 const jwtSecret = process.env.JWT_SECRET || 'your-default-secret';
 
-export async function GET() {
-  const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value;
+export async function GET(request) {
+  const token = request.cookies.get('token')?.value;
 
   if (!token) {
     return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
@@ -29,7 +27,7 @@ export async function GET() {
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
-    
+
     const { password, ...userWithoutPassword } = user;
 
     return NextResponse.json(userWithoutPassword);
