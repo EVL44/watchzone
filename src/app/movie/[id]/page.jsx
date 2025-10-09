@@ -104,7 +104,8 @@ export default async function MoviePage({ params }) {
           <Adsense
               adSlot="9095823329"
               style={{ display: 'block' }}
-              format="autorelaxed"
+              format="auto"
+              responsive="true"
           />
         </div>
         {cast?.length > 0 && <div className="mt-12 relative"><h2 className="text-3xl font-bold text-foreground mb-4">Top Billed Cast</h2><div className="flex overflow-x-auto gap-5 pb-4 custom-scrollbar">{cast.map(actor => <CastCard key={actor.cast_id} actor={actor} />)}</div><div className="absolute top-12 right-0 bottom-0 w-16 bg-gradient-to-l from-background pointer-events-none"></div></div>}

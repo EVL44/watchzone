@@ -11,7 +11,8 @@ export default function TopRatedPage() {
         <Adsense
             adSlot="9095823329"
             style={{ display: 'block' }}
-            format="autorelaxed"
+            format="auto"
+            responsive="true"
         />
       </div>
       <TopRatedMovies />
