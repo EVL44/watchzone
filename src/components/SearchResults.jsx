@@ -59,7 +59,7 @@ export default function SearchResults() {
           <Link href={`/${isMovie ? 'movie' : 'serie'}/${item.id}`} key={`${item.id}-${item.media_type}`}>
             <div className="bg-secondary rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer group">
               <div className="relative aspect-[2/3]">
-                <Image src={posterPath} alt={title} layout="fill" objectFit="cover" />
+                <Image src={posterPath} alt={title} layout="fill" objectFit="cover" unoptimized={true}/>
               </div>
               <div className="p-3">
                 <h3 className="text-foreground font-bold text-md truncate group-hover:text-primary">{title}</h3>
@@ -82,7 +82,7 @@ export default function SearchResults() {
              <div className="bg-secondary rounded-lg p-4 flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer group aspect-[2/3]">
                 <div className="w-24 h-24 rounded-full bg-primary flex-shrink-0 overflow-hidden relative mb-4">
                   {item.avatarUrl ? (
-                    <Image src={item.avatarUrl} alt={item.username} layout="fill" objectFit="cover" />
+                    <Image src={item.avatarUrl} alt={item.username} layout="fill" objectFit="cover" unoptimized={true} />
                   ) : (
                     <FaUserCircle className="w-full h-full text-white" />
                   )}

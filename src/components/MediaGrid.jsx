@@ -20,7 +20,7 @@ export default function MediaGrid({ items, title }) {
               <Link href={`/${itemType}/${tmdbId}`} key={`${itemType}-${item.id}`}>
                 <div className="relative aspect-[2/3] rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
                   {posterPath ? (
-                    <Image src={`https://image.tmdb.org/t/p/w500${posterPath}`} alt={itemName} layout="fill" objectFit="cover" />
+                    <Image src={`https://image.tmdb.org/t/p/w500${posterPath}`} alt={itemName} layout="fill" objectFit="cover" unoptimized={true} />
                   ) : (
                     <div className="w-full h-full bg-secondary flex items-center justify-center p-2">
                       <span className="text-foreground/50 text-xs text-center">{itemName}</span>

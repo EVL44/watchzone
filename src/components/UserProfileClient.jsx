@@ -61,7 +61,7 @@ export default function UserProfileClient({ profile }) {
       <div className="bg-surface p-6 rounded-lg mb-8 md:flex md:items-center">
         <div className="w-24 h-24 md:w-32 md:h-32 mx-auto md:mx-0 mb-4 md:mb-0 md:mr-6 flex-shrink-0">
           <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-4xl font-bold text-white overflow-hidden relative">
-            {profile.avatarUrl ? <Image src={profile.avatarUrl} alt="Avatar" layout="fill" objectFit="cover" /> : <FaUserCircle />}
+            {profile.avatarUrl ? <Image src={profile.avatarUrl} alt="Avatar" layout="fill" objectFit="cover" unoptimized={true} /> : <FaUserCircle />}
           </div>
         </div>
         <div className="flex-grow text-center md:text-left">

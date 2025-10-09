@@ -30,6 +30,7 @@ export default function PlaylistCard({ playlist }) {
                   layout="fill"
                   objectFit="cover"
                   className="transition-transform duration-500 group-hover:scale-110"
+                  unoptimized={true}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

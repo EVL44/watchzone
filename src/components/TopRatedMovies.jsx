@@ -88,6 +88,7 @@ export default function TopRatedMovies() {
                   layout="fill"
                   objectFit="cover"
                   className="rounded-md"
+                  unoptimized={true}
                 />
               </Link>
               <div className="flex-1 ml-4">

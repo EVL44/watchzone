@@ -24,7 +24,7 @@ export default function UserListModal({ isOpen, title, users, onClose }) {
                   <Link href={`/user/${user.username}`} onClick={onClose} className="flex items-center gap-4 p-2 rounded-md hover:bg-secondary">
                     <div className="w-12 h-12 rounded-full bg-primary flex-shrink-0 overflow-hidden relative">
                       {user.avatarUrl ? (
-                        <Image src={user.avatarUrl} alt={user.username} layout="fill" objectFit="cover" />
+                        <Image src={user.avatarUrl} alt={user.username} layout="fill" objectFit="cover" unoptimized={true} />
                       ) : (
                         <FaUserCircle className="w-full h-full text-white" />
                       )}
