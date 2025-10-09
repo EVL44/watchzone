@@ -100,7 +100,7 @@ export default async function SerieDetailsPage({ params }) {
             {creator && <div className="mt-6"><h3 className="text-xl font-bold text-foreground">Creator</h3><p className="text-gray-500">{creator.name}</p></div>}
           </div>
         </div>
-        <div className="my-8 w-full flex justify-center">
+        <div className="my-8">
           <Adsense
             adSlot="9095823329"
             style={{ display: 'block' }}
