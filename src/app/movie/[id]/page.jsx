@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
+import Adsense from '@/components/Adsense';
 
 async function getMovieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
@@ -98,6 +99,13 @@ export default async function MoviePage({ params }) {
             <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Overview</h2><p className="text-gray-500 leading-relaxed">{movie.overview}</p></div>
             {director && <div className="mt-6"><h3 className="text-xl font-bold text-foreground">Director</h3><p className="text-gray-500">{director.name}</p></div>}
           </div>
+        </div>
+        <div className="my-8">
+          <Adsense
+              adSlot="9095823329"
+              style={{ display: 'block' }}
+              format="autorelaxed"
+          />
         </div>
         {cast?.length > 0 && <div className="mt-12 relative"><h2 className="text-3xl font-bold text-foreground mb-4">Top Billed Cast</h2><div className="flex overflow-x-auto gap-5 pb-4 custom-scrollbar">{cast.map(actor => <CastCard key={actor.cast_id} actor={actor} />)}</div><div className="absolute top-12 right-0 bottom-0 w-16 bg-gradient-to-l from-background pointer-events-none"></div></div>}
       </div>

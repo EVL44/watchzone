@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
+import Adsense from '@/components/Adsense';
 
 async function getSerieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
@@ -98,6 +99,13 @@ export default async function SerieDetailsPage({ params }) {
             <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Overview</h2><p className="text-gray-500 leading-relaxed">{serie.overview}</p></div>
             {creator && <div className="mt-6"><h3 className="text-xl font-bold text-foreground">Creator</h3><p className="text-gray-500">{creator.name}</p></div>}
           </div>
+        </div>
+        <div className="my-8">
+          <Adsense
+            adSlot="9095823329"
+            style={{ display: 'block' }}
+            format="autorelaxed"
+          />
         </div>
         {cast?.length > 0 && (
           <div className="mt-12 relative">

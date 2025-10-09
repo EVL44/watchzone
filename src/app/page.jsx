@@ -1,6 +1,7 @@
 import PopularMovies from "../components/PopularMovies";
 import PopularSeries from "../components/PopularSeries";
 import Trending from "../components/Trending";
+import Adsense from "@/components/Adsense";
 
 export default function Home() {
   return (
@@ -13,12 +14,37 @@ export default function Home() {
         </div>
       </div>
       <div className="container mx-auto px-4 py-8">
+        {/* Horizontal Ad */}
+        <div className="my-8">
+          <Adsense
+            adSlot="9786088462"
+            style={{ display: 'block' }}
+            format="auto"
+            responsive="true"
+          />
+        </div>
         <div className="mb-16">
           <Trending />
+        </div>
+        <div className="my-8">
+          <Adsense
+            adSlot="9786088462"
+            style={{ display: 'block' }}
+            format="auto"
+            responsive="true"
+          />
         </div>
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-foreground mb-6">Popular Movies</h2>
           <PopularMovies />
+        </div>
+        <div className="my-8">
+          <Adsense
+            adSlot="9786088462"
+            style={{ display: 'block' }}
+            format="auto"
+            responsive="true"
+          />
         </div>
         <div>
           <h2 className="text-3xl font-bold text-foreground mb-6">Popular Series</h2>
