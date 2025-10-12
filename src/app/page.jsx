@@ -35,7 +35,7 @@ export default async function Home() {
   return (
     <>
       <div 
-        className="relative h-[60vh] flex items-center justify-center text-white text-center px-4 bg-cover bg-fixed bg-center" 
+        className="relative h-[60vh] flex items-center justify-center text-white text-center px-4 bg-cover bg-center" 
         style={{ backgroundImage: `url('${backgroundImage}')` }}
       >
         <div className="absolute inset-0 bg-primary opacity-40"></div>
