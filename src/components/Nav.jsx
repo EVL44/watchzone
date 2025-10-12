@@ -87,7 +87,16 @@ export default function Nav() {
       <nav className="bg-background shadow-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="text-xl font-bold text-primary">Kentar</Link>
+            <Link href="/" className="text-xl font-bold text-primary flex items-center">
+              <Image
+                src="/logo.png" // Corrected path
+                alt="WatchZone"
+                width={60} // Added width
+                height={20} // Added height
+                className="h-auto transition-transform duration-500 group-hover:scale-110"
+                priority={true} // Optional: Prioritize loading the logo
+              />
+            </Link>
             
             {/* Desktop Search Bar */}
             <div className="hidden md:flex flex-grow max-w-xl mx-4 relative">

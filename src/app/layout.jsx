@@ -12,10 +12,10 @@ const jetBrains_mono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Kentar - Your Movie Platform",
-  description: "Rate and review your favorite movies and series.",
+  title: "WatchZone - Your Movie Platform",
+  description: "Watch your favorite movies and series.",
   icons: {
-    icon: "\icon.png",
+    icon: "\logo.png",
   }
 };
 

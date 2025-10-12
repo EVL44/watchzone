@@ -5,7 +5,7 @@
   /* Light Theme (default) */
   --background: white;
   --foreground: #0c0a09;
-  --primary: red;
+  --primary: #59a80d;
   --secondary: #f3f4f6; /* Light gray for secondary elements */
   --surface: #ffffff; /* Surface for cards */
   --font-jetBrains-mono: "JetBrains Mono", monospace;
@@ -15,7 +15,7 @@
   /* Dark Theme */
   --background: #0c0a09;
   --foreground: #ededed;
-  --primary: red;
+  --primary: #7eff00;
   --secondary: #292524; /* Dark gray for secondary elements */
   --surface: #1c1917; /* Dark surface for cards */
 }
