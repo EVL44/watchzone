@@ -89,7 +89,7 @@ export default function Nav() {
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="text-xl font-bold text-primary flex items-center">
               <Image
-                src="/logo.png" // Corrected path
+                src="/wzonenbg.png" // Corrected path
                 alt="WatchZone"
                 width={60} // Added width
                 height={20} // Added height

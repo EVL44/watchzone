@@ -38,8 +38,8 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-8 bg-stone-800 rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold text-center text-white">Welcome Back</h1>
+    <div className="w-full max-w-md p-8 space-y-8 bg-secondary rounded-lg shadow-lg">
+      <h1 className="text-3xl font-bold text-center text-foreground">Welcome Back</h1>
       {successMessage && <p className="text-green-500 text-sm text-center">{successMessage}</p>}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="relative">
@@ -48,7 +48,7 @@ export default function LoginForm() {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 text-white bg-stone-700 border border-stone-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2 text-foreground bg-background border border-stone-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Email"
             required
           />
@@ -59,7 +59,7 @@ export default function LoginForm() {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 text-white bg-stone-700 border border-stone-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2 text-foreground bg-background border border-stone-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Password"
             required
           />

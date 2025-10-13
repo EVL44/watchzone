@@ -12,10 +12,10 @@ const jetBrains_mono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "WatchZone - Your Movie Platform",
+  title: "Watch Zone - Your Movie Platform",
   description: "Watch your favorite movies and series.",
   icons: {
-    icon: "\logo.png",
+    icon: "\wzonenbg.png",
   }
 };
 
