@@ -95,6 +95,7 @@ export default function Nav() {
                 height={20} // Added height
                 className="h-auto transition-transform duration-500 group-hover:scale-110"
                 priority={true} // Optional: Prioritize loading the logo
+                unoptimized={true}
               />
             </Link>
             
