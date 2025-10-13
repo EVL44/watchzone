@@ -1,11 +1,12 @@
 import Image from 'next/image';
-import { FaStar, FaTv } from 'react-icons/fa';
+import { FaStar, FaTv, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
+import Link from 'next/link';
 
 async function getSerieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
@@ -87,13 +88,23 @@ export default async function SerieDetailsPage({ params }) {
               <div className="flex items-center gap-2"><FaTv /><span>{serie.number_of_episodes} Episodes</span></div>
             </div>
             
-            <MediaActionButtons 
-              item={serie} 
-              itemType="series"
-              initialFavorite={serie.isFavorite}
-              initialWatchlisted={serie.isWatchlisted}
-              trailer={serie.trailer}
-            />
+            <div className="flex items-center">
+                <MediaActionButtons 
+                  item={serie} 
+                  itemType="series"
+                  initialFavorite={serie.isFavorite}
+                  initialWatchlisted={serie.isWatchlisted}
+                  trailer={serie.trailer}
+                />
+
+                <Link 
+                  href={`/watch/tv/${params.id}`} 
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-6 ml-4"
+                >
+                  <FaPlay />
+                  <span>Watch Now</span>
+                </Link>
+            </div>
 
             {serie.genres?.length > 0 && <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Genres</h2><div className="flex flex-wrap gap-2">{serie.genres.map(g => <span key={g.id} className="bg-stone-700 text-gray-300 px-3 py-1 rounded-full text-sm">{g.name}</span>)}</div></div>}
             <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Overview</h2><p className="text-gray-500 leading-relaxed">{serie.overview}</p></div>

@@ -1,11 +1,12 @@
 import Image from 'next/image';
-import { FaStar, FaClock, FaCalendarAlt } from 'react-icons/fa';
+import { FaStar, FaClock, FaCalendarAlt, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
+import Link from 'next/link';
 
 async function getMovieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
@@ -87,13 +88,23 @@ export default async function MoviePage({ params }) {
               <div className="flex items-center gap-2"><FaCalendarAlt /><span>{new Date(movie.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
             </div>
             
-            <MediaActionButtons 
-              item={movie} 
-              itemType="movie"
-              initialFavorite={movie.isFavorite}
-              initialWatchlisted={movie.isWatchlisted}
-              trailer={movie.trailer}
-            />
+            <div className="flex items-center">
+              <MediaActionButtons 
+                item={movie} 
+                itemType="movie"
+                initialFavorite={movie.isFavorite}
+                initialWatchlisted={movie.isWatchlisted}
+                trailer={movie.trailer}
+              />
+              
+              <Link 
+                href={`/watch/movie/${params.id}`} 
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-6 ml-4"
+              >
+                <FaPlay />
+                <span>Watch Now</span>
+              </Link>
+            </div>
 
             {movie.genres?.length > 0 && <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Genres</h2><div className="flex flex-wrap gap-2">{movie.genres.map(g => <span key={g.id} className="bg-stone-700 text-gray-300 px-3 py-1 rounded-full text-sm">{g.name}</span>)}</div></div>}
             <div className="mt-6"><h2 className="text-2xl font-bold text-foreground mb-2">Overview</h2><p className="text-gray-500 leading-relaxed">{movie.overview}</p></div>
