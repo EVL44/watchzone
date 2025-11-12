@@ -7,11 +7,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext'; // CORRECTED IMPORT PATH
 import Image from 'next/image';
 import UploadWidget from '@/components/UploadWidget';
-import { FaUserCircle, FaEdit, FaHeart, FaListAlt } from 'react-icons/fa';
+import { FaUserCircle, FaEdit, FaHeart, FaListAlt, FaTrash } from 'react-icons/fa';
 import MediaGrid from '@/components/MediaGrid';
 
 export default function ProfilePage() {
-  const { user, loading, updateUserContext } = useAuth();
+  const { user, loading, updateUserContext, deleteAccount } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('favorites');
   const [username, setUsername] = useState('');
@@ -19,6 +19,7 @@ export default function ProfilePage() {
   const [password, setPassword] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push('/login');
@@ -56,6 +57,18 @@ export default function ProfilePage() {
     handleUpdate(payload);
   };
 
+  const handleDeleteAccount = async () => {
+    setIsUpdating(true);
+    try {
+      await deleteAccount();
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+      setShowDeleteConfirmation(false);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (loading || !user) return <div className="text-center py-20 text-foreground">Loading...</div>;
 
   const combinedFavorites = [...(user.favoriteMovies || []), ...(user.favoriteSeries || [])];
@@ -84,6 +97,15 @@ export default function ProfilePage() {
               <li><button onClick={() => setActiveTab('watchlist')} className={`w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 ${activeTab === 'watchlist' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}><FaListAlt /> Watchlist</button></li>
               <li><button onClick={() => setActiveTab('edit')} className={`w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 ${activeTab === 'edit' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}><FaEdit /> Edit Profile</button></li>
             </ul>
+            {/* NEW DELETE BUTTON SECTION */}
+            <div className="mt-6 pt-4 border-t border-secondary">
+              <button 
+                onClick={() => setShowDeleteConfirmation(true)}
+                className="w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium"
+              >
+                <FaTrash /> Delete Account
+              </button>
+            </div>
           </nav>
         </aside>
         
@@ -115,6 +137,24 @@ export default function ProfilePage() {
           </div>
         </main>
       </div>
+
+      {/* NEW DELETE CONFIRMATION MODAL */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
+          <div className="bg-surface rounded-lg w-full max-w-sm p-6 relative shadow-2xl">
+            <h2 className="text-xl font-bold text-red-500 mb-4">Confirm Account Deletion</h2>
+            <p className="text-foreground/80 mb-6">Are you absolutely sure you want to delete your account? This action is permanent and cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowDeleteConfirmation(false)} disabled={isUpdating} className="bg-secondary text-foreground px-4 py-2 rounded-md hover:bg-secondary/70 transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+              <button onClick={handleDeleteAccount} disabled={isUpdating} className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors">
+                {isUpdating ? 'Deleting...' : 'Yes, Delete My Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

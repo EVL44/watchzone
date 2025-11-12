@@ -69,13 +69,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // New deleteAccount function
+  const deleteAccount = async () => {
+    setLoading(true);
+    const res = await fetch('/api/user/delete', {
+      method: 'DELETE', // Use DELETE method
+    });
+
+    const data = await res.json();
+    
+    if (!res.ok) {
+        setLoading(false);
+        throw new Error(data.message || 'Account deletion failed');
+    }
+
+    // Clear user state and redirect to signup with a success message
+    setUser(null);
+    router.push('/signup?message=Your account has been successfully deleted. We are sad to see you go!');
+    setLoading(false);
+  };
+
   // Function to update user lists locally without a full re-fetch
   const updateUserContext = (updatedUserData) => {
     setUser(updatedUserData);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, fetchUser, updateUserContext }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, fetchUser, updateUserContext, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );
