@@ -1,45 +1,33 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { getToken } from 'next-auth/jwt'; // 1. Import next-auth's getToken
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export async function DELETE(request) {
-  const token = request.cookies.get('token')?.value;
+  // 2. Get the user's session token
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+
   if (!token) {
     return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
   }
 
   try {
-    const decoded = await verifyToken(token);
-    const userId = decoded.id;
+    const userId = token.id; // 3. Get the ID from the token
 
     // Delete the user from the database
     await prisma.user.delete({
       where: { id: userId },
     });
 
-    // Create a response and clear the cookie
-    const response = NextResponse.json({ message: 'Account successfully deleted. Redirecting to login.' });
-    
-    // Clear the token cookie
-    response.cookies.set('token', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      expires: new Date(0),
-      path: '/',
-    });
+    // 4. Just return a success message.
+    // The client will handle the sign-out.
+    return NextResponse.json({ message: 'Account successfully deleted.' });
 
-    return response;
   } catch (error) {
     console.error('Account Deletion Error:', error);
-    // Specifically handle the case where the user is not found (already deleted, maybe?)
     if (error.code === 'P2025') { 
-        // We still clear the cookie just in case, but return a 404/400.
-        const response = NextResponse.json({ message: 'User not found, but session cleared.' }, { status: 404 });
-        response.cookies.set('token', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', expires: new Date(0), path: '/' });
-        return response;
+        return NextResponse.json({ message: 'User not found.' }, { status: 404 });
     }
     return NextResponse.json({ message: 'An internal server error occurred during deletion.' }, { status: 500 });
   }

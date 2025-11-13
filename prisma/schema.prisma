@@ -12,10 +12,17 @@ datasource db {
 
 model User {
   id                 String     @id @default(auto()) @map("_id") @db.ObjectId
-  username           String     @unique
-  password           String
+  
+  // --- USER FIELDS ---
+  name               String?    // <-- THE NEWLY ADDED FIELD FOR 'Abdelouahed'
+  username           String?    @unique // This is for your custom username (e.g., 'evl44')
+  password           String?    // Optional: for Google users
   email              String     @unique
-  avatarUrl          String?
+  emailVerified      DateTime?  // Required by Adapter
+  image              String?    // For Google profile picture
+  avatarUrl          String?    // Your existing custom field
+
+  // --- RELATION FIELDS ---
   favoriteMovieIds   String[]   @db.ObjectId
   watchlistMovieIds  String[]   @db.ObjectId
   favoriteSeriesIds  String[]   @db.ObjectId
@@ -27,13 +34,17 @@ model User {
   playlists          Playlist[]
   followers          Follow[]   @relation("Following")
   following          Follow[]   @relation("Follower")
+
+  // --- NEXT-AUTH RELATIONS ---
+  accounts           Account[]
+  sessions           Session[]
 }
 
 model Movie {
   id                 String     @id @default(auto()) @map("_id") @db.ObjectId
   tmdbId             Int        @unique
   title              String
-  posterPath         String?
+  posterPath         String?   
   releaseDate        String?
   favoritedByIds     String[]   @db.ObjectId
   watchlistedByIds   String[]   @db.ObjectId
@@ -48,12 +59,12 @@ model Series {
   tmdbId             Int        @unique
   name               String
   posterPath         String?
-  firstAirDate       String?
+  firstAirDate       String?   
   favoritedByIds     String[]   @db.ObjectId
   watchlistedByIds   String[]   @db.ObjectId
   favoritedBy        User[]     @relation("FavoriteSeries", fields: [favoritedByIds], references: [id])
   watchlistedBy      User[]     @relation("WatchlistSeries", fields: [watchlistedByIds], references: [id])
-  playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id])
+  playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id]) // This is correct now
   playlistIds        String[]   @db.ObjectId
 }
 
@@ -77,4 +88,42 @@ model Follow {
   followingId String @db.ObjectId
 
   @@unique([followerId, followingId])
+}
+
+// --- NEXT-AUTH MODELS ---
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

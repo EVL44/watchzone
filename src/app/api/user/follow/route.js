@@ -1,29 +1,30 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { getToken } from 'next-auth/jwt'; // 1. Import next-auth's getToken
 
 export async function POST(request) {
-  const token = request.cookies.get('token')?.value;
+  // 2. Get the user's session token
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  
   if (!token) {
     return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
   }
 
   try {
-    const decoded = await verifyToken(token);
-    const currentUserId = decoded.id;
-
+    const currentUserId = token.id; // 3. Get the ID from the token
     const { targetUserId, action } = await request.json(); // action: 'follow' or 'unfollow'
 
     if (!targetUserId || !action) {
       return NextResponse.json({ message: 'Missing target user ID or action' }, { status: 400 });
     }
     
+    // --- THIS IS THE FIX ---
     if (currentUserId === targetUserId) {
         return NextResponse.json({ message: 'You cannot follow yourself' }, { status: 400 });
     }
+    // --- END OF FIX ---
 
     if (action === 'follow') {
-      // Use upsert to prevent creating duplicate follow records
       await prisma.follow.upsert({
         where: {
           followerId_followingId: {

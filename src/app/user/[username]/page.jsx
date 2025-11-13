@@ -1,8 +1,13 @@
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
+// src/app/user/[username]/page.jsx
+
+import { getServerSession } from 'next-auth/next'; // 1. Import getServerSession
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // 2. Import your authOptions
 import prisma from '@/lib/prisma';
 import UserProfileClient from '@/components/UserProfileClient';
 import { notFound } from 'next/navigation';
+// 3. We no longer need cookies or verifyToken
+// import { cookies } from 'next/headers';
+// import { verifyToken } from '@/lib/auth';
 
 async function getUserProfile(username, currentUserId) {
   const user = await prisma.user.findUnique({
@@ -33,6 +38,8 @@ async function getUserProfile(username, currentUserId) {
   userProfile.followers = user.followers.map(f => f.follower);
   userProfile.following = user.following.map(f => f.following);
   userProfile.isFollowing = user.followers.some(f => f.follower.id === currentUserId);
+  
+  // This check will now work correctly
   userProfile.isCurrentUser = user.id === currentUserId;
 
   if (!userProfile.isCurrentUser) {
@@ -43,20 +50,14 @@ async function getUserProfile(username, currentUserId) {
 }
 
 export default async function UserProfilePage({ params }) {
-  // FIX: Access 'username' from params at the very top
   const { username } = params;
 
-  const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value;
-  let currentUserId = null;
-  if (token) {
-    try {
-      const decoded = await verifyToken(token);
-      currentUserId = decoded.id;
-    } catch (e) { /* Invalid token */ }
-  }
+  // 4. Get the session using next-auth
+  const session = await getServerSession(authOptions);
+  
+  // 5. Get the current user's ID from the session
+  const currentUserId = session?.user?.id || null;
 
-  // FIX: Use the 'username' variable here
   const profile = await getUserProfile(username, currentUserId);
 
   if (!profile) {

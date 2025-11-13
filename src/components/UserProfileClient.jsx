@@ -25,22 +25,45 @@ export default function UserProfileClient({ profile }) {
 
   const handleFollowToggle = async () => {
     if (!currentUser) return router.push('/login');
+    
     setIsUpdatingFollow(true);
     const action = isFollowing ? 'unfollow' : 'follow';
+
+    // --- THIS IS THE FIX ---
+    // Save the original state in case of an error
+    const originalFollowState = isFollowing;
+    const originalFollowers = followers;
+
+    // Optimistic UI update
+    setIsFollowing(!isFollowing);
+    if (action === 'follow') {
+      setFollowers([...followers, currentUser]);
+    } else {
+      setFollowers(followers.filter(user => user.id !== currentUser.id));
+    }
+    // --- END OF FIX ---
+
     try {
-      await fetch('/api/user/follow', {
+      const res = await fetch('/api/user/follow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetUserId: profile.id, action }),
       });
-      setIsFollowing(!isFollowing);
-      if (action === 'follow') {
-        setFollowers([...followers, currentUser]);
-      } else {
-        setFollowers(followers.filter(user => user.id !== currentUser.id));
+
+      // 1. Check if the API call was successful
+      if (!res.ok) {
+        const data = await res.json();
+        // 2. If it failed (e.g., "You cannot follow yourself"), throw an error
+        throw new Error(data.message || 'Follow request failed');
       }
+      
+      // 3. If it was successful, do nothing (UI is already updated)
+
     } catch (err) {
-      console.error(err);
+      console.error(err.message);
+      // 4. On error, REVERT the UI to its original state
+      setIsFollowing(originalFollowState);
+      setFollowers(originalFollowers);
     } finally {
       setIsUpdatingFollow(false);
     }
@@ -81,6 +104,8 @@ export default function UserProfileClient({ profile }) {
             </button>
           </div>
         </div>
+        
+        {/* This logic will now work because 'profile.isCurrentUser' is correct */}
         {currentUser && !profile.isCurrentUser && (
           <button onClick={handleFollowToggle} disabled={isUpdatingFollow} className={`mt-4 md:mt-0 px-6 py-2 rounded-full font-semibold transition-colors disabled:opacity-50 ${isFollowing ? 'bg-secondary text-foreground' : 'bg-primary text-white hover:bg-opacity-80'}`}>
             {isUpdatingFollow ? '...' : isFollowing ? 'Following' : 'Follow'}

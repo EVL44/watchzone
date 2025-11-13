@@ -55,7 +55,7 @@ export default function Footer() {
 
         </div>
         <div className="border-t border-secondary/50 mt-8 pt-6 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Kentar. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} watchzone. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

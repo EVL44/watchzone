@@ -12,7 +12,7 @@ const jetBrains_mono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Watch Zone - Your Movie Platform",
+  title: "Watchzone - Your Movie Platform",
   description: "Watch your favorite movies and series.",
   icons: {
     icon: "\wzonenbg.png",
@@ -24,8 +24,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={jetBrains_mono.variable}>
-        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738"
-        crossOrigin="anonymous"></Script>
+        <Script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+        
         <Providers>
           <Nav />
           <main>
@@ -33,8 +38,13 @@ export default function RootLayout({ children }) {
           </main>
           <Footer />
         </Providers>
+        
         {/* The Cloudinary script is essential for the upload widget to function */}
-        <Script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript" strategy="beforeInteractive" />
+        <Script 
+          src="https://upload-widget.cloudinary.com/global/all.js" 
+          type="text/javascript" 
+          strategy="beforeInteractive" 
+        />
       </body>
     </html>
   );

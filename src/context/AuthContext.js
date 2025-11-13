@@ -1,107 +1,117 @@
 'use client';
 
-import { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Start with loading true
+  const { data: session, status, update: updateSession } = useSession();
   const router = useRouter();
-
-  // Function to fetch the current user's data from the backend
-  const fetchUser = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/me', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Not authenticated');
-      }
-      const userData = await res.json();
-      setUser(userData);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Fetch user data on initial load
+  
+  const loading = status === 'loading';
+  const [user, setUser] = useState(null);
+  
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+    if (status === "authenticated") {
+      const fetchFullUser = async () => {
+         try {
+            // Use username if it exists, otherwise fall back to name (for profile/complete)
+            const identifier = session.user.username || session.user.name;
+            if (!identifier) return; // Wait for session update
 
-  // Login function
-  const login = async (email, password) => {
-    setLoading(true);
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setLoading(false);
-      throw new Error(data.message || 'Login failed');
-    }
-
-    // After successful login, fetch user data to update the context
-    await fetchUser();
-    setLoading(false);
-  };
-
-  // Logout function
-  const logout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (error) {
-      console.error("Logout failed", error);
-    } finally {
+            // Use /api/user/[username] to get full user data
+            const res = await fetch(`/api/user/${identifier}`); 
+            if(!res.ok) {
+              // This can happen if username was just set, we just need the session user
+              if(session.user.needsUsername) {
+                setUser(session.user);
+                return;
+              }
+              throw new Error("Failed to fetch user");
+            }
+            const fullUserData = await res.json();
+            setUser(fullUserData);
+         } catch (e) {
+            console.error("Failed to fetch full user", e);
+            signOut(); 
+         }
+      };
+      
+      if (session.user.username) {
+         fetchFullUser();
+      } else if (session.user.needsUsername) {
+         setUser(session.user);
+      }
+      
+    } else if (status === "unauthenticated") {
       setUser(null);
-      router.push('/login');
     }
-  };
+  }, [session, status]);
 
-  // New deleteAccount function
-  const deleteAccount = async () => {
-    setLoading(true);
-    const res = await fetch('/api/user/delete', {
-      method: 'DELETE', // Use DELETE method
+
+  const login = async (email, password) => {
+    const result = await signIn('credentials', {
+      redirect: false, 
+      email,
+      password,
     });
 
-    const data = await res.json();
-    
+    if (result.error) {
+      throw new Error(result.error || 'Login failed');
+    }
+    // The redirect is handled in LoginForm.jsx
+  };
+
+  const logout = async () => {
+    await signOut({ callbackUrl: '/login' });
+  };
+  
+  // --- THIS IS THE FIX for Delete Account ---
+  const deleteAccount = async () => {
+    // 1. Call the (now fixed) API route
+    const res = await fetch('/api/user/delete', {
+      method: 'DELETE',
+    });
+
+    // 2. Check if the API call was successful
     if (!res.ok) {
-        setLoading(false);
+        const data = await res.json();
         throw new Error(data.message || 'Account deletion failed');
     }
 
-    // Clear user state and redirect to signup with a success message
-    setUser(null);
-    router.push('/signup?message=Your account has been successfully deleted. We are sad to see you go!');
-    setLoading(false);
+    // 3. If successful, use next-auth's signOut to clear the session
+    // and redirect with a success message.
+    await signOut({
+      callbackUrl: '/signup?message=Your account has been successfully deleted.'
+    });
   };
+  // --- END OF FIX ---
 
-  // Function to update user lists locally without a full re-fetch
   const updateUserContext = (updatedUserData) => {
-    setUser(updatedUserData);
+    setUser(updatedUserData); 
+    
+    // This is the function from useSession to update the token
+    updateSession({ username: updatedUserData.username });
   };
+  
+  const contextValue = useMemo(() => ({
+    user,
+    loading: loading || (status === 'authenticated' && !user), 
+    login,
+    logout,
+    deleteAccount,
+    updateUserContext,
+  }), [user, loading, status]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, fetchUser, updateUserContext, deleteAccount }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the auth context
 export const useAuth = () => {
   return useContext(AuthContext);
 };
