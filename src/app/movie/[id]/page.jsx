@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import { FaStar, FaClock, FaCalendarAlt, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
+// REMOVE: import { cookies } from 'next/headers';
+// REMOVE: import { verifyToken } from '@/lib/auth';
+import { getServerSession } from 'next-auth/next'; // ADD
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // ADD
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
@@ -11,6 +13,7 @@ import Recommendations from '@/components/Recommendations';
 import CommentSection from '@/components/CommentSection'; 
 
 async function getMovieDetails(id, userId) {
+  // ... (The internals of this function are fine)
   const token = process.env.TMDB_API_TOKEN;
   const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
   
@@ -43,18 +46,25 @@ async function getMovieDetails(id, userId) {
 }
 
 export default async function MoviePage({ params }) {
-  const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value;
-  let userId = null;
-  if (token) {
-    try {
-      const decoded = await verifyToken(token);
-      userId = decoded.id;
-    } catch (e) { /* Invalid token */ }
-  }
+  // --- THIS IS THE FIX ---
+  const session = await getServerSession(authOptions);
+  let userId = session?.user?.id || null;
+  // --- END OF FIX ---
+
+  // (The old, incorrect logic is removed)
+  // const cookieStore = cookies();
+  // const token = cookieStore.get('token')?.value;
+  // let userId = null;
+  // if (token) {
+  //   try {
+  //     const decoded = await verifyToken(token);
+  //     userId = decoded.id;
+  //   } catch (e) { /* Invalid token */ }
+  // }
 
   const movie = await getMovieDetails(params.id, userId);
 
+  // ... (rest of the component is unchanged)
   if (!movie) return <div className="text-center py-20 text-foreground">Movie not found.</div>;
 
   const director = movie.credits?.crew.find((p) => p.job === 'Director');
@@ -63,7 +73,7 @@ export default async function MoviePage({ params }) {
   const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
 
   return (
-    // --- REVERTED TO OLD DESIGN ---
+    // ... (rest of the JSX is unchanged)
     <div className="min-h-screen">
       {/* 1. Backdrop Image */}
       {backdropUrl && (

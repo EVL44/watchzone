@@ -37,7 +37,7 @@ export async function POST(request) {
       return NextResponse.json(userToReturn);
     }
     
-    // --- THIS IS THE RE-ADDED LOGIC FOR LISTS ---
+    // --- THIS IS THE RE-ADDED AND FIXED LOGIC FOR LISTS ---
     const { itemId, itemType, listType, action } = body;
     if (itemId && itemType && listType && action) {
         const numericItemId = parseInt(itemId, 10);
@@ -49,6 +49,16 @@ export async function POST(request) {
           series: { favorites: 'favoriteSeriesIds', watchlist: 'watchlistSeriesIds' },
         }[itemType][listType];
 
+        // 1.5. (THE FIX) Fetch the user's current list first
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { [fieldToUpdate]: true }
+        });
+
+        if (!user) {
+          throw new Error('User not found during list update');
+        }
+        
         // 2. Fetch item details from TMDB to save in our DB
         const tmdbToken = process.env.TMDB_API_TOKEN;
         const tmdbRes = await fetch(`https://api.themoviedb.org/3/${itemType === 'series' ? 'tv' : 'movie'}/${numericItemId}`, { 
@@ -68,14 +78,24 @@ export async function POST(request) {
           create: createPayload,
         });
 
-        // 4. Atomically add (push) or remove (pull) the item's ID from the user's list
-        const updateOperation = action === 'add' ? 'push' : 'pull';
+        // 4. (THE FIX) Atomically add or remove using a Set to prevent duplicates
+        const currentList = user[fieldToUpdate] || [];
+        const idSet = new Set(currentList.map(String)); // Use strings for comparison
+        const mediaIdString = mediaItem.id.toString();
+
+        if (action === 'add') {
+          idSet.add(mediaIdString);
+        } else { // action === 'remove'
+          idSet.delete(mediaIdString);
+        }
+        
+        const newList = Array.from(idSet); // Convert Set back to array
         
         const updatedUser = await prisma.user.update({
           where: { id: userId },
           data: { 
             [fieldToUpdate]: {
-              [updateOperation]: mediaItem.id // 'mediaItem.id' is the MongoDB ObjectId
+              set: newList // Use 'set' to overwrite with the deduped list
             }
           },
           include: { favoriteMovies: true, watchlistMovies: true, favoriteSeries: true, watchlistSeries: true }
