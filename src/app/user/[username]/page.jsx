@@ -43,6 +43,9 @@ async function getUserProfile(username, currentUserId) {
 }
 
 export default async function UserProfilePage({ params }) {
+  // FIX: Access 'username' from params at the very top
+  const { username } = params;
+
   const cookieStore = cookies();
   const token = cookieStore.get('token')?.value;
   let currentUserId = null;
@@ -53,7 +56,8 @@ export default async function UserProfilePage({ params }) {
     } catch (e) { /* Invalid token */ }
   }
 
-  const profile = await getUserProfile(params.username, currentUserId);
+  // FIX: Use the 'username' variable here
+  const profile = await getUserProfile(username, currentUserId);
 
   if (!profile) {
     notFound();
