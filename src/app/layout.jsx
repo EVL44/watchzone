@@ -24,12 +24,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={jetBrains_mono.variable}>
+        
+        {/* --- THIS IS THE FIX --- */}
+        {/* This strategy tells Next.js to load this script *after* the page */}
+        {/* is fully interactive, preventing the hydration error. */}
         <Script 
           async 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="afterInteractive" 
         />
+        {/* --- END OF FIX --- */}
         
         <Providers>
           <Nav />
@@ -39,7 +44,7 @@ export default function RootLayout({ children }) {
           <Footer />
         </Providers>
         
-        {/* The Cloudinary script is essential for the upload widget to function */}
+        {/* The Cloudinary script needs to load early */}
         <Script 
           src="https://upload-widget.cloudinary.com/global/all.js" 
           type="text/javascript" 

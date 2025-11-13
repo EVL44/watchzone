@@ -7,6 +7,8 @@ import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
 import Link from 'next/link';
+import Recommendations from '@/components/Recommendations'; 
+import CommentSection from '@/components/CommentSection'; 
 
 async function getMovieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
@@ -30,10 +32,8 @@ async function getMovieDetails(id, userId) {
       where: { id: userId },
       select: { favoriteMovies: { select: { tmdbId: true } }, watchlistMovies: { select: { tmdbId: true } } }
     });
-    const isFavorite = user?.favoriteMovies.some(m => m.tmdbId === movie.id) || false;
-    const isWatchlisted = user?.watchlistMovies.some(m => m.tmdbId === movie.id) || false;
-    movie.isFavorite = isFavorite;
-    movie.isWatchlisted = isWatchlisted;
+    movie.isFavorite = user?.favoriteMovies.some(m => m.tmdbId === movie.id) || false;
+    movie.isWatchlisted = user?.watchlistMovies.some(m => m.tmdbId === movie.id) || false;
   } else {
     movie.isFavorite = false;
     movie.isWatchlisted = false;
@@ -63,15 +63,21 @@ export default async function MoviePage({ params }) {
   const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
 
   return (
+    // --- REVERTED TO OLD DESIGN ---
     <div className="min-h-screen">
+      {/* 1. Backdrop Image */}
       {backdropUrl && (
         <div className="absolute top-0 left-0 w-full h-[60vh] -z-10">
           <Image src={backdropUrl} alt={`${movie.title} backdrop`} layout="fill" objectFit="cover" className="opacity-80 object-top" unoptimized={true} />
+          {/* 2. Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         </div>
       )}
+      
+      {/* 3. Main Content Container */}
       <div className="container mt-30 mx-auto px-4 py-16 md:py-24">
         <div className="md:flex md:gap-8">
+          {/* 4. Poster */}
           <div className="md:w-1/3 flex-shrink-0">
             {posterUrl && (
               <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
@@ -79,9 +85,12 @@ export default async function MoviePage({ params }) {
               </div>
             )}
           </div>
+          
+          {/* 5. Details */}
           <div className="md:w-2/3 mt-8 md:mt-0">
             <h1 className="text-4xl md:text-5xl font-extrabold text-foreground">{movie.title}</h1>
             {movie.tagline && <p className="text-gray-500 text-lg italic mt-2">"{movie.tagline}"</p>}
+            
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500 mt-4">
               <div className="flex items-center gap-2"><FaStar className="text-yellow-400" /><span className="font-bold text-foreground text-lg">{movie.vote_average.toFixed(1)}</span></div>
               {movie.runtime > 0 && <div className="flex items-center gap-2"><FaClock /><span>{`${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`}</span></div>}
@@ -96,7 +105,6 @@ export default async function MoviePage({ params }) {
                 initialWatchlisted={movie.isWatchlisted}
                 trailer={movie.trailer}
               />
-              
               <Link 
                 href={`/watch/movie/${params.id}`} 
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-6 ml-4"
@@ -111,6 +119,8 @@ export default async function MoviePage({ params }) {
             {director && <div className="mt-6"><h3 className="text-xl font-bold text-foreground">Director</h3><p className="text-gray-500">{director.name}</p></div>}
           </div>
         </div>
+        
+        {/* 6. Ad and Cast (Unchanged) */}
         <div className="my-8">
           <Adsense
               adSlot="9095823329"
@@ -120,6 +130,10 @@ export default async function MoviePage({ params }) {
           />
         </div>
         {cast?.length > 0 && <div className="mt-12 relative"><h2 className="text-3xl font-bold text-foreground mb-4">Top Billed Cast</h2><div className="flex overflow-x-auto gap-5 pb-4 custom-scrollbar">{cast.map(actor => <CastCard key={actor.cast_id} actor={actor} />)}</div><div className="absolute top-12 right-0 bottom-0 w-16 bg-gradient-to-l from-background pointer-events-none"></div></div>}
+        
+        {/* 7. New Sections (Kept) */}
+        <Recommendations tmdbId={movie.id} mediaType="movies" />
+        <CommentSection tmdbId={movie.id} mediaType="movies" />
       </div>
     </div>
   );

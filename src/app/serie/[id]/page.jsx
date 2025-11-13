@@ -7,6 +7,8 @@ import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
 import Link from 'next/link';
+import Recommendations from '@/components/Recommendations'; 
+import CommentSection from '@/components/CommentSection'; 
 
 async function getSerieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
@@ -30,10 +32,8 @@ async function getSerieDetails(id, userId) {
       where: { id: userId },
       select: { favoriteSeries: { select: { tmdbId: true } }, watchlistSeries: { select: { tmdbId: true } } }
     });
-    const isFavorite = user?.favoriteSeries.some(s => s.tmdbId === serie.id) || false;
-    const isWatchlisted = user?.watchlistSeries.some(s => s.tmdbId === serie.id) || false;
-    serie.isFavorite = isFavorite;
-    serie.isWatchlisted = isWatchlisted;
+    serie.isFavorite = user?.favoriteSeries.some(s => s.tmdbId === serie.id) || false;
+    serie.isWatchlisted = user?.watchlistSeries.some(s => s.tmdbId === serie.id) || false;
   } else {
     serie.isFavorite = false;
     serie.isWatchlisted = false;
@@ -63,15 +63,21 @@ export default async function SerieDetailsPage({ params }) {
   const posterUrl = serie.poster_path ? `https://image.tmdb.org/t/p/w500${serie.poster_path}` : '';
 
   return (
+    // --- REVERTED TO OLD DESIGN ---
     <div className="min-h-screen">
+      {/* 1. Backdrop Image */}
       {backdropUrl && (
         <div className="absolute top-0 left-0 w-full h-[60vh] -z-10">
           <Image src={backdropUrl} alt={`${serie.name} backdrop`} layout="fill" objectFit="cover" className="opacity-80 object-top" unoptimized={true} />
+          {/* 2. Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         </div>
       )}
+      
+      {/* 3. Main Content Container */}
       <div className="container mt-30 mx-auto px-4 py-16 md:py-24">
         <div className="md:flex md:gap-8">
+          {/* 4. Poster */}
           <div className="md:w-1/3 flex-shrink-0">
             {posterUrl && (
               <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
@@ -79,9 +85,12 @@ export default async function SerieDetailsPage({ params }) {
               </div>
             )}
           </div>
+          
+          {/* 5. Details */}
           <div className="md:w-2/3 mt-8 md:mt-0">
             <h1 className="text-4xl md:text-5xl font-extrabold text-foreground">{serie.name}</h1>
             {serie.tagline && <p className="text-gray-500 text-lg italic mt-2">"{serie.tagline}"</p>}
+            
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500 mt-4">
               <div className="flex items-center gap-2"><FaStar className="text-yellow-400" /><span className="font-bold text-foreground text-lg">{serie.vote_average.toFixed(1)}</span></div>
               <div className="flex items-center gap-2"><FaTv /><span>{serie.number_of_seasons} Seasons</span></div>
@@ -96,7 +105,6 @@ export default async function SerieDetailsPage({ params }) {
                   initialWatchlisted={serie.isWatchlisted}
                   trailer={serie.trailer}
                 />
-
                 <Link 
                   href={`/watch/tv/${params.id}`} 
                   className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-6 ml-4"
@@ -111,6 +119,8 @@ export default async function SerieDetailsPage({ params }) {
             {creator && <div className="mt-6"><h3 className="text-xl font-bold text-foreground">Creator</h3><p className="text-gray-500">{creator.name}</p></div>}
           </div>
         </div>
+        
+        {/* 6. Ad and Cast (Unchanged) */}
         <div className="my-8">
           <Adsense
             adSlot="9095823329"
@@ -128,7 +138,12 @@ export default async function SerieDetailsPage({ params }) {
             <div className="absolute top-12 right-0 bottom-0 w-16 bg-gradient-to-l from-background pointer-events-none"></div>
           </div>
         )}
+        
+        {/* 7. New Sections (Kept) */}
+        <Recommendations tmdbId={serie.id} mediaType="series" />
+        <CommentSection tmdbId={serie.id} mediaType="series" />
       </div>
     </div>
+    // --- END OF REVERTED DESIGN ---
   );
 }

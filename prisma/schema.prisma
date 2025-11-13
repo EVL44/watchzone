@@ -13,16 +13,14 @@ datasource db {
 model User {
   id                 String     @id @default(auto()) @map("_id") @db.ObjectId
   
-  // --- USER FIELDS ---
-  name               String?    // <-- THE NEWLY ADDED FIELD FOR 'Abdelouahed'
-  username           String?    @unique // This is for your custom username (e.g., 'evl44')
-  password           String?    // Optional: for Google users
+  name               String?    
+  username           String?    @unique 
+  password           String?    
   email              String     @unique
-  emailVerified      DateTime?  // Required by Adapter
-  image              String?    // For Google profile picture
-  avatarUrl          String?    // Your existing custom field
+  emailVerified      DateTime?  
+  image              String?    
+  avatarUrl          String?    
 
-  // --- RELATION FIELDS ---
   favoriteMovieIds   String[]   @db.ObjectId
   watchlistMovieIds  String[]   @db.ObjectId
   favoriteSeriesIds  String[]   @db.ObjectId
@@ -35,9 +33,11 @@ model User {
   followers          Follow[]   @relation("Following")
   following          Follow[]   @relation("Follower")
 
-  // --- NEXT-AUTH RELATIONS ---
   accounts           Account[]
   sessions           Session[]
+  
+  // --- ADD THIS RELATION ---
+  comments           Comment[]  
 }
 
 model Movie {
@@ -64,7 +64,7 @@ model Series {
   watchlistedByIds   String[]   @db.ObjectId
   favoritedBy        User[]     @relation("FavoriteSeries", fields: [favoritedByIds], references: [id])
   watchlistedBy      User[]     @relation("WatchlistSeries", fields: [watchlistedByIds], references: [id])
-  playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id]) // This is correct now
+  playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id]) 
   playlistIds        String[]   @db.ObjectId
 }
 
@@ -91,7 +91,6 @@ model Follow {
 }
 
 // --- NEXT-AUTH MODELS ---
-
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
@@ -126,4 +125,22 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// --- NEW COMMENT MODEL ---
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to User
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+
+  // We will link comments to a media item by its TMDB ID and type
+  tmdbId    Int
+  mediaType String // "movie" or "series"
+
+  @@index([tmdbId, mediaType])
 }
