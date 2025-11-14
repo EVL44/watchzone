@@ -77,18 +77,18 @@ export default async function MoviePage({ params }) {
     <div className="min-h-screen">
       {/* 1. Backdrop Image */}
       {backdropUrl && (
-        <div className="absolute top-0 left-0 w-full h-[60vh] -z-10">
-          <Image src={backdropUrl} alt={`${movie.title} backdrop`} layout="fill" objectFit="cover" className="opacity-80 object-top" unoptimized={true} />
+        <div className="absolute top-0 left-0 w-full h-[80vh] -z-10">
+          <Image src={backdropUrl} alt={`${movie.title} backdrop`} layout="fill" objectFit="cover" className="opacity-90 object-top" unoptimized={true} />
           {/* 2. Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         </div>
       )}
       
       {/* 3. Main Content Container */}
-      <div className="container mt-30 mx-auto px-4 py-16 md:py-24">
+      <div className="container mt-30 px-4 py-16 md:py-24">
         <div className="md:flex md:gap-8">
           {/* 4. Poster */}
-          <div className="md:w-1/3 flex-shrink-0">
+          <div className="md:w-1/4 flex-shrink-0 ">
             {posterUrl && (
               <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
                 <Image src={posterUrl} alt={movie.title} layout="fill" objectFit="cover" unoptimized={true} />
@@ -107,7 +107,7 @@ export default async function MoviePage({ params }) {
               <div className="flex items-center gap-2"><FaCalendarAlt /><span>{new Date(movie.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
             </div>
             
-            <div className="flex items-center">
+            <div className="flex flex-col md:flex-row md:items-center">
               <MediaActionButtons 
                 item={movie} 
                 itemType="movie"
@@ -117,7 +117,7 @@ export default async function MoviePage({ params }) {
               />
               <Link 
                 href={`/watch/movie/${params.id}`} 
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-6 ml-4"
+                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-4 md:mt-6 md:ml-4 w-full md:w-auto"
               >
                 <FaPlay />
                 <span>Watch Now</span>

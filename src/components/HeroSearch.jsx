@@ -90,7 +90,7 @@ export default function HeroSearch() {
             {recommendations.map(item => (
               <li
                 key={item.id}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-secondary cursor-pointer text-gray-900"
+                className="flex items-center gap-4 px-4 py-3 hover:bg-gray-300 cursor-pointer text-gray-900"
                 onClick={() => handleRecommendationClick(item)}
               >
                 {/* Image/Icon */}

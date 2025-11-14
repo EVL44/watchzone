@@ -37,7 +37,6 @@ export default function CompleteProfilePage() {
     }
 
     try {
-      // Use your existing API route to update the user
       const res = await fetch('/api/user/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,15 +48,9 @@ export default function CompleteProfilePage() {
       if (!res.ok) {
         throw new Error(data.message || 'Something went wrong');
       }
-
-      // 1. Update the next-auth session token
       await updateSession({ username: data.username });
-      
-      // 2. Update your custom AuthContext
       updateUserContext(data);
-
-      // 3. Redirect to home
-      router.push('/');
+      router.push('/'); 
 
     } catch (err) {
       setError(err.message);

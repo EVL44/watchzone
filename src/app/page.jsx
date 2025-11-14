@@ -40,7 +40,6 @@ export default async function Home() {
           <h1 className="text-5xl md:text-6xl font-extrabold">Welcome to WatchZone</h1>
           <p className="text-xl md:text-2xl mt-4 mb-8">Your ultimate destination for discovering and tracking movies and TV shows.</p>
           
-          {/* 3. Add the HeroSearch component */}
           <HeroSearch />
           
         </div>

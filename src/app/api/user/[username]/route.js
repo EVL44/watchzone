@@ -2,14 +2,13 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt'; // 1. Import next-auth's getToken
+import { getToken } from 'next-auth/jwt';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
   const { username } = params;
   
-  // 2. Get the current session token using next-auth
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const currentUserId = token?.id || null;
 
@@ -42,21 +41,23 @@ export async function GET(request, { params }) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // 3. Destructure the password to remove it
     const { password, ...userProfile } = user;
     
     userProfile.followers = user.followers.map(f => f.follower);
     userProfile.following = user.following.map(f => f.following);
     userProfile.isFollowing = user.followers.some(f => f.follower.id === currentUserId);
     userProfile.isCurrentUser = user.id === currentUserId;
-
-    // 4. THIS IS THE FIX
-    // This flag tells the client if the user has a password or not
     userProfile.hasPassword = !!password;
-    // ---
     
+    // --- SUPER ADMIN CHECK ---
+    userProfile.isSuperAdmin = user.email === process.env.SUPER_ADMIN_EMAIL;
+    // Force roles for Super Admin in the profile view as well
+    if (userProfile.isSuperAdmin) {
+      userProfile.roles = ['ADMIN', 'VERIFIED'];
+    }
+    // --- END SUPER ADMIN CHECK ---
+
     if (!userProfile.isCurrentUser) {
-      // Don't send email to other users
       delete userProfile.email; 
     }
 

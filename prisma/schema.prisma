@@ -10,41 +10,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
-  
-  name               String?    
-  username           String?    @unique 
-  password           String?    
-  email              String     @unique
-  emailVerified      DateTime?  
-  image              String?    
-  avatarUrl          String?    
+// --- ADDED ROLE ENUM ---
+enum Role {
+  ADMIN
+  VERIFIED
+}
 
-  favoriteMovieIds   String[]   @db.ObjectId
-  watchlistMovieIds  String[]   @db.ObjectId
-  favoriteSeriesIds  String[]   @db.ObjectId
-  watchlistSeriesIds String[]   @db.ObjectId
-  favoriteMovies     Movie[]    @relation("FavoriteMovies", fields: [favoriteMovieIds], references: [id])
-  watchlistMovies    Movie[]    @relation("WatchlistMovies", fields: [watchlistMovieIds], references: [id])
-  favoriteSeries     Series[]   @relation("FavoriteSeries", fields: [favoriteSeriesIds], references: [id])
-  watchlistSeries    Series[]   @relation("WatchlistSeries", fields: [watchlistSeriesIds], references: [id])
+model User {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  username        String?   @unique
+  password        String?
+  email           String    @unique
+  emailVerified   DateTime?
+  image           String?
+  avatarUrl       String?
+
+  roles           Role[]    @default([])
+  
+  // --- ADDED CREATEDAT FIELD ---
+  createdAt       DateTime  @default(now())
+
+  favoriteMovieIds   String[] @db.ObjectId
+  watchlistMovieIds  String[] @db.ObjectId
+  favoriteSeriesIds  String[] @db.ObjectId
+  watchlistSeriesIds String[] @db.ObjectId
+  favoriteMovies     Movie[]  @relation("FavoriteMovies", fields: [favoriteMovieIds], references: [id])
+  watchlistMovies    Movie[]  @relation("WatchlistMovies", fields: [watchlistMovieIds], references: [id])
+  favoriteSeries     Series[] @relation("FavoriteSeries", fields: [favoriteSeriesIds], references: [id])
+  watchlistSeries    Series[] @relation("WatchlistSeries", fields: [watchlistSeriesIds], references: [id])
   playlists          Playlist[]
-  followers          Follow[]   @relation("Following")
-  following          Follow[]   @relation("Follower")
+  followers          Follow[] @relation("Following")
+  following          Follow[] @relation("Follower")
 
   accounts           Account[]
   sessions           Session[]
-  
-  // --- ADD THIS RELATION ---
-  comments           Comment[]  
+  comments           Comment[]
+  likedCommentsIds   String[]  @db.ObjectId
+  likedComments      Comment[] @relation("LikedComments", fields: [likedCommentsIds], references: [id])
 }
 
 model Movie {
   id                 String     @id @default(auto()) @map("_id") @db.ObjectId
   tmdbId             Int        @unique
   title              String
-  posterPath         String?   
+  posterPath         String?
   releaseDate        String?
   favoritedByIds     String[]   @db.ObjectId
   watchlistedByIds   String[]   @db.ObjectId
@@ -59,12 +69,12 @@ model Series {
   tmdbId             Int        @unique
   name               String
   posterPath         String?
-  firstAirDate       String?   
+  firstAirDate       String?
   favoritedByIds     String[]   @db.ObjectId
   watchlistedByIds   String[]   @db.ObjectId
   favoritedBy        User[]     @relation("FavoriteSeries", fields: [favoritedByIds], references: [id])
   watchlistedBy      User[]     @relation("WatchlistSeries", fields: [watchlistedByIds], references: [id])
-  playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id]) 
+  playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id])
   playlistIds        String[]   @db.ObjectId
 }
 
@@ -90,7 +100,6 @@ model Follow {
   @@unique([followerId, followingId])
 }
 
-// --- NEXT-AUTH MODELS ---
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
@@ -127,20 +136,21 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// --- NEW COMMENT MODEL ---
 model Comment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   text      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relation to User
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @db.ObjectId
-
-  // We will link comments to a media item by its TMDB ID and type
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
   tmdbId    Int
   mediaType String // "movie" or "series"
+  parentId  String?  @db.ObjectId
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("CommentReplies")
+  likedByIds String[] @db.ObjectId
+  likedBy    User[]   @relation("LikedComments", fields: [likedByIds], references: [id])
 
   @@index([tmdbId, mediaType])
+  @@index([parentId])
 }

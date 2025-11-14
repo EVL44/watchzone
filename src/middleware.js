@@ -32,19 +32,25 @@ export async function middleware(req) {
       return NextResponse.redirect(homeUrl);
     }
 
-    // 4. --- THIS IS THE NEW FIX ---
-    // If they are a GOOGLE USER (no password) and try to access
+    // 4. If they are a GOOGLE USER (no password) and try to access
     // the change-password page, redirect them to settings.
     else if (pathname === '/profile/change-password' && !token.hasPassword) {
       return NextResponse.redirect(profileUrl);
     }
-    // --- END OF NEW FIX ---
+
+    // 5. --- NEW ADMIN ROUTE PROTECTION ---
+    // If they try to access the admin panel but do not have the ADMIN role
+    if (pathname.startsWith('/admin') && !token.roles?.includes('ADMIN')) {
+      return NextResponse.redirect(homeUrl);
+    }
+    // --- END OF NEW PROTECTION ---
+
   }
 
   // If the user is NOT logged in
   if (!token) {
-    // 5. If they try to access any protected profile page
-    if (pathname.startsWith('/profile')) {
+    // 6. If they try to access any protected profile page
+    if (pathname.startsWith('/profile') || pathname.startsWith('/admin')) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
   }

@@ -68,24 +68,7 @@ export const authOptions = {
         secure: isProduction,
       },
     },
-    state: {
-      name: isProduction ? `__Secure-next-auth.state` : `next-auth.state`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: isProduction,
-      }
-    },
-    callbackUrl: {
-      name: isProduction ? `__Secure-next-auth.callback-url` : `next-auth.callback-url`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: isProduction,
-      },
-    },
+    // ... other cookie settings
     csrfToken: {
       name: isProduction ? `__Host-next-auth.csrf-token` : `next-auth.csrf-token`,
       options: {
@@ -100,18 +83,29 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        // --- THIS IS THE FIX ---
-        // On sign-in, check the DB for password and add to token
         const dbUser = await prisma.user.findUnique({
            where: { id: user.id },
-           select: { username: true, password: true, avatarUrl: true }
+           select: { username: true, password: true, avatarUrl: true, roles: true, email: true }
         });
+        
         token.id = user.id;
         token.avatarUrl = dbUser.avatarUrl; 
-        token.username = dbUser.username; 
+        token.username = dbUser.username;
+        token.email = dbUser.email; // Store email in token
         token.needsUsername = !dbUser.username;
-        token.hasPassword = !!dbUser.password; // Add hasPassword flag to token
-        // --- END OF FIX ---
+        token.hasPassword = !!dbUser.password;
+        
+        // --- SUPER ADMIN LOGIC ---
+        const isSuperAdmin = dbUser.email === process.env.SUPER_ADMIN_EMAIL;
+        token.isSuperAdmin = isSuperAdmin;
+        
+        if (isSuperAdmin) {
+          // Force Super Admin to have both roles in their session
+          token.roles = ['ADMIN', 'VERIFIED'];
+        } else {
+          token.roles = dbUser.roles || [];
+        }
+        // --- END OF SUPER ADMIN LOGIC ---
       }
       
       if (trigger === "update" && session?.username) {
@@ -127,12 +121,17 @@ export const authOptions = {
     },
     
     async session({ session, token }) {
-      // Pass all our custom flags to the client-side session
       session.user.id = token.id;
       session.user.username = token.username;
       session.user.avatarUrl = token.avatarUrl || token.picture; 
       session.user.needsUsername = token.needsUsername;
-      session.user.hasPassword = token.hasPassword; // Pass flag to session
+      session.user.hasPassword = token.hasPassword;
+      
+      // --- PASS SUPER ADMIN TO SESSION ---
+      session.user.roles = token.roles || [];
+      session.user.isSuperAdmin = token.isSuperAdmin || false;
+      session.user.email = token.email; // Pass email
+      // --- END OF PASS ---
       
       return session;
     },
