@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import Image from 'next/image';
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 export default function Footer() {
@@ -14,7 +15,18 @@ export default function Footer() {
           
           {/* Column 1: Greeting & Brand */}
           <div>
-            <h2 className="text-xl font-bold text-primary mb-2">WatchZone</h2>
+            <div className='mb-2 flex items-center gap-2'>
+              <Image
+                  src="/wzmax.png" // Corrected path
+                  alt="wzone"
+                  width={40} // Added width
+                  height={15} // Added height
+                  className="h-auto transition-transform duration-500 group-hover:scale-110 "
+                  priority={true} 
+                  unoptimized={true}
+                />
+                <h2 className="text-xl font-bold text-primary ">watchzone</h2>
+            </div>
             {user ? (
               <p>Hi, <span className="font-bold text-foreground">{user.username}</span>! Thanks for visiting.</p>
             ) : (

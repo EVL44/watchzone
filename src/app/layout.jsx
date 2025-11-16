@@ -12,10 +12,10 @@ const jetBrains_mono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Watchzone - Your Movie Platform",
+  title: "watchzone - Your Movie Platform",
   description: "Watch your favorite movies and series.",
   icons: {
-    icon: "\wzonenbg.png",
+    icon: "\wzmax.png",
   }
 };
 
@@ -23,18 +23,20 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <link rel="apple-touch-icon" href="/wzmax.png"></link>
+      </head>
       <body className={jetBrains_mono.variable}>
         
-        {/* --- THIS IS THE FIX --- */}
-        {/* This strategy tells Next.js to load this script *after* the page */}
-        {/* is fully interactive, preventing the hydration error. */}
         <Script 
           async 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8121438559622738"
           crossOrigin="anonymous"
           strategy="afterInteractive" 
         />
-        {/* --- END OF FIX --- */}
         
         <Providers>
           <Nav />
@@ -44,7 +46,6 @@ export default function RootLayout({ children }) {
           <Footer />
         </Providers>
         
-        {/* The Cloudinary script needs to load early */}
         <Script 
           src="https://upload-widget.cloudinary.com/global/all.js" 
           type="text/javascript" 

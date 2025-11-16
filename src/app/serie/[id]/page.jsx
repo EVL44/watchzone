@@ -11,6 +11,53 @@ import Adsense from '@/components/Adsense';
 import Link from 'next/link';
 import Recommendations from '@/components/Recommendations'; 
 import CommentSection from '@/components/CommentSection'; 
+import { notFound } from 'next/navigation';
+
+export async function generateMetadata({ params }) {
+  const { id } = params;
+  const token = process.env.TMDB_API_TOKEN;
+
+  // Note: Using the correct 'tv' endpoint
+  const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
+  const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?language=en-US`, options);
+  
+  if (!res.ok) {
+    return {
+      title: 'Series Not Found',
+      description: 'This series could not be found.',
+    }
+  }
+
+  const serie = await res.json();
+
+  // --- FIX ---
+  // Safely get the year, or use 'N/A' as a fallback
+  const airYear = serie.first_air_date ? serie.first_air_date.split('-')[0] : 'N/A';
+
+  // Safely get the description, or use a default fallback
+  const description = serie.overview 
+    ? (serie.overview.length > 155 ? `${serie.overview.substring(0, 155)}...` : serie.overview)
+    : 'No description available.';
+  // --- END FIX ---
+
+  return {
+    // Use the safe variables here
+    title: `${serie.name || 'Series'} (${airYear}) - watchzone`,
+    description: description,
+    openGraph: {
+      title: serie.name || 'Series',
+      description: description,
+      images: [
+        {
+          url: `https://image.tmdb.org/t/p/w500${serie.poster_path}`,
+          width: 500,
+          height: 750,
+          alt: serie.name || 'Series Poster',
+        },
+      ],
+    },
+  };
+}
 
 async function getSerieDetails(id, userId) {
   // ... (The internals of this function are fine)

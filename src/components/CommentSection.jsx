@@ -168,7 +168,7 @@ function CommentItem({ comment, user, onDelete, onLike, onReplyPosted }) {
               </button>
             </>
           )}
-          {isOwner && !comment.user.isSuperAdmin && ( // Super Admins can't delete their own comments
+          {isOwner && ( 
             <button
               onClick={() => onDelete(comment.id)}
               className="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:underline"

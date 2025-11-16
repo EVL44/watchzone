@@ -11,6 +11,52 @@ import Adsense from '@/components/Adsense';
 import Link from 'next/link';
 import Recommendations from '@/components/Recommendations'; 
 import CommentSection from '@/components/CommentSection'; 
+import { notFound } from 'next/navigation';
+
+export async function generateMetadata({ params }) {
+  const { id } = params;
+  const token = process.env.TMDB_API_TOKEN;
+
+  const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
+  const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?language=en-US`, options);
+  
+  if (!res.ok) {
+    return {
+      title: 'Movie Not Found',
+      description: 'This movie could not be found.',
+    }
+  }
+
+  const movie = await res.json();
+
+  // --- FIX ---
+  // Safely get the year, or use 'N/A' as a fallback
+  const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
+  
+  // Safely get the description, or use a default fallback
+  const description = movie.overview 
+    ? (movie.overview.length > 155 ? `${movie.overview.substring(0, 155)}...` : movie.overview)
+    : 'No description available.';
+  // --- END FIX ---
+
+  return {
+    // Use the safe variables here
+    title: `${movie.title || 'Movie'} (${releaseYear}) - watchwone`,
+    description: description,
+    openGraph: {
+      title: movie.title || 'Movie',
+      description: description,
+      images: [
+        {
+          url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+          width: 500,
+          height: 750,
+          alt: movie.title || 'Movie Poster',
+        },
+      ],
+    },
+  };
+}
 
 async function getMovieDetails(id, userId) {
   // ... (The internals of this function are fine)

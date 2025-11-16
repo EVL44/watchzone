@@ -89,8 +89,8 @@ export default function Nav() {
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="text-xl font-bold text-primary flex items-center">
               <Image
-                src="/wzonenbg.png" // Corrected path
-                alt="WatchZone"
+                src="/wz0.png" // Corrected path
+                alt="wzone"
                 width={60} // Added width
                 height={20} // Added height
                 className="h-auto transition-transform duration-500 group-hover:scale-110"
