@@ -69,7 +69,7 @@ export default function HeroSearch() {
     <div className="relative w-full max-w-xl mx-auto" ref={searchRef}>
       <div className="relative">
         <span className="absolute inset-y-0 left-0 flex items-center pl-6 text-gray-500">
-          <FaSearch size={20} />
+          <FaSearch size={20} className='text-gray-500' />
         </span>
         <input
           type="text"

@@ -1,10 +1,8 @@
 import Image from 'next/image';
 import { FaStar, FaTv, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
-// REMOVE: import { cookies } from 'next/headers';
-// REMOVE: import { verifyToken } from '@/lib/auth';
-import { getServerSession } from 'next-auth/next'; // ADD
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // ADD
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
@@ -13,54 +11,90 @@ import Recommendations from '@/components/Recommendations';
 import CommentSection from '@/components/CommentSection'; 
 import { notFound } from 'next/navigation';
 
+// Helper function to create JSON-LD structured data
+const createJsonLd = (serie, creator) => {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    "name": serie.name,
+    "description": serie.overview,
+    "image": `https://image.tmdb.org/t/p/w500${serie.poster_path}`,
+    "datePublished": serie.first_air_date,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": serie.vote_average.toFixed(1),
+      "bestRating": "10",
+      "ratingCount": serie.vote_count
+    },
+    "genre": serie.genres.map(g => g.name),
+    "numberOfSeasons": serie.number_of_seasons,
+    "numberOfEpisodes": serie.number_of_episodes,
+  };
+
+  if (creator) {
+    data.creator = {
+      "@type": "Person",
+      "name": creator.name
+    };
+  }
+  
+  return JSON.stringify(data);
+};
+
 export async function generateMetadata({ params }) {
   const { id } = params;
   const token = process.env.TMDB_API_TOKEN;
 
-  // Note: Using the correct 'tv' endpoint
   const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
   const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?language=en-US`, options);
   
   if (!res.ok) {
-    return {
-      title: 'Series Not Found',
-      description: 'This series could not be found.',
-    }
+    return notFound();
   }
 
   const serie = await res.json();
-
-  // --- FIX ---
-  // Safely get the year, or use 'N/A' as a fallback
   const airYear = serie.first_air_date ? serie.first_air_date.split('-')[0] : 'N/A';
 
-  // Safely get the description, or use a default fallback
+  // SEO-optimized description
   const description = serie.overview 
-    ? (serie.overview.length > 155 ? `${serie.overview.substring(0, 155)}...` : serie.overview)
-    : 'No description available.';
-  // --- END FIX ---
+    ? `Discover details, seasons, cast, trailers, and reviews for ${serie.name} (${airYear}). Track, rate, and add ${serie.name} to your watchlist on watchzone.`
+    : `Details for ${serie.name} (${airYear}) on watchzone.`;
 
   return {
-    // Use the safe variables here
-    title: `${serie.name || 'Series'} (${airYear}) - watchzone`,
+    // The template from layout.jsx will automatically add "| watchzone"
+    title: `${serie.name || 'Series'} (${airYear})`,
     description: description,
+    
+    // Open Graph data for rich social sharing
     openGraph: {
-      title: serie.name || 'Series',
+      title: `${serie.name || 'Series'} (${airYear}) | watchzone`,
       description: description,
       images: [
+        {
+          url: `https://image.tmdb.org/t/p/w780${serie.backdrop_path || serie.poster_path}`,
+          width: 780,
+          height: 439,
+          alt: `${serie.name} Backdrop`,
+        },
         {
           url: `https://image.tmdb.org/t/p/w500${serie.poster_path}`,
           width: 500,
           height: 750,
-          alt: serie.name || 'Series Poster',
+          alt: `${serie.name} Poster`,
         },
       ],
+      type: 'video.tv_series',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${serie.name || 'Series'} (${airYear}) | watchzone`,
+      description: description,
+      images: [`https://image.tmdb.org/t/p/w780${serie.backdrop_path || serie.poster_path}`],
     },
   };
 }
 
 async function getSerieDetails(id, userId) {
-  // ... (The internals of this function are fine)
   const token = process.env.TMDB_API_TOKEN;
   const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
   
@@ -93,39 +127,37 @@ async function getSerieDetails(id, userId) {
 }
 
 export default async function SerieDetailsPage({ params }) {
-  // --- THIS IS THE FIX ---
   const session = await getServerSession(authOptions);
   let userId = session?.user?.id || null;
-  // --- END OF FIX ---
-
-  // (The old, incorrect logic is removed)
-  // const cookieStore = cookies();
-  // const token = cookieStore.get('token')?.value;
-  // let userId = null;
-  // if (token) {
-  //   try {
-  //     const decoded = await verifyToken(token);
-  //     userId = decoded.id;
-  //   } catch (e) { /* Invalid token */ }
-  // }
 
   const serie = await getSerieDetails(params.id, userId);
 
-  // ... (rest of the component is unchanged)
-  if (!serie) return <div className="text-center py-20 text-foreground">Series not found.</div>;
+  if (!serie) {
+    notFound();
+  }
 
   const creator = serie.created_by?.length > 0 ? serie.created_by[0] : null;
   const cast = serie.credits?.cast.slice(0, 20);
   const backdropUrl = serie.backdrop_path ? `https://image.tmdb.org/t/p/original${serie.backdrop_path}` : '';
   const posterUrl = serie.poster_path ? `https://image.tmdb.org/t/p/w500${serie.poster_path}` : '';
 
+  // Create the JSON-LD data
+  const jsonLd = createJsonLd(serie, creator);
+
   return (
-    // ... (rest of the JSX is unchanged)
     <div className="min-h-screen">
+      {/* ** NEW: JSON-LD Structured Data Script **
+      */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+      />
+      {/* End of JSON-LD Script */}
+
       {/* 1. Backdrop Image */}
       {backdropUrl && (
         <div className="absolute top-0 left-0 w-full h-[80vh] -z-10">
-          <Image src={backdropUrl} alt={`${serie.name} backdrop`} layout="fill" objectFit="cover" className="opacity-90 object-top" unoptimized={true} />
+          <Image src={backdropUrl} alt={`${serie.name} backdrop`} layout="fill" objectFit="cover" className="opacity-90 object-top" unoptimized={true} priority />
           {/* 2. Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         </div>
@@ -138,13 +170,14 @@ export default async function SerieDetailsPage({ params }) {
           <div className="md:w-1/4 flex-shrink-0">
             {posterUrl && (
               <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
-                <Image src={posterUrl} alt={serie.name} layout="fill" objectFit="cover" unoptimized={true} />
+                <Image src={posterUrl} alt={serie.name} layout="fill" objectFit="cover" unoptimized={true} priority />
               </div>
             )}
           </div>
           
           {/* 5. Details */}
           <div className="md:w-2/3 mt-8 md:mt-0">
+            {/* Use <h1> for the main title for SEO */}
             <h1 className="text-4xl md:text-5xl font-extrabold text-foreground">{serie.name}</h1>
             {serie.tagline && <p className="text-gray-500 text-lg italic mt-2">"{serie.tagline}"</p>}
             

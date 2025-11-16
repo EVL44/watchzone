@@ -1,10 +1,8 @@
 import Image from 'next/image';
 import { FaStar, FaClock, FaCalendarAlt, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
-// REMOVE: import { cookies } from 'next/headers';
-// REMOVE: import { verifyToken } from '@/lib/auth';
-import { getServerSession } from 'next-auth/next'; // ADD
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // ADD
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
@@ -12,6 +10,35 @@ import Link from 'next/link';
 import Recommendations from '@/components/Recommendations'; 
 import CommentSection from '@/components/CommentSection'; 
 import { notFound } from 'next/navigation';
+
+// Helper function to create JSON-LD structured data
+const createJsonLd = (movie, director) => {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    "name": movie.title,
+    "description": movie.overview,
+    "image": `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+    "datePublished": movie.release_date,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": movie.vote_average.toFixed(1),
+      "bestRating": "10",
+      "ratingCount": movie.vote_count
+    },
+    "genre": movie.genres.map(g => g.name),
+  };
+
+  if (director) {
+    data.director = {
+      "@type": "Person",
+      "name": director.name
+    };
+  }
+  
+  return JSON.stringify(data);
+};
+
 
 export async function generateMetadata({ params }) {
   const { id } = params;
@@ -21,45 +48,55 @@ export async function generateMetadata({ params }) {
   const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?language=en-US`, options);
   
   if (!res.ok) {
-    return {
-      title: 'Movie Not Found',
-      description: 'This movie could not be found.',
-    }
+    // This will trigger the notFound() page
+    return notFound();
   }
 
   const movie = await res.json();
-
-  // --- FIX ---
-  // Safely get the year, or use 'N/A' as a fallback
   const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
   
-  // Safely get the description, or use a default fallback
+  // SEO-optimized description
   const description = movie.overview 
-    ? (movie.overview.length > 155 ? `${movie.overview.substring(0, 155)}...` : movie.overview)
-    : 'No description available.';
-  // --- END FIX ---
+    ? `Discover details, cast, trailers, and reviews for ${movie.title} (${releaseYear}). Track, rate, and add ${movie.title} to your watchlist on watchzone.`
+    : `Details for ${movie.title} (${releaseYear}) on watchzone.`;
 
   return {
-    // Use the safe variables here
-    title: `${movie.title || 'Movie'} (${releaseYear}) - watchwone`,
+    // CRITICAL FIX: "watchwone" -> "watchzone"
+    // The template from layout.jsx will automatically add "| watchzone"
+    title: `${movie.title || 'Movie'} (${releaseYear})`,
     description: description,
+    
+    // Open Graph data for rich social sharing
     openGraph: {
-      title: movie.title || 'Movie',
+      title: `${movie.title || 'Movie'} (${releaseYear}) | watchzone`,
       description: description,
       images: [
+        {
+          url: `https://image.tmdb.org/t/p/w780${movie.backdrop_path || movie.poster_path}`,
+          width: 780,
+          height: 439, // Approximate 16:9 for backdrops
+          alt: `${movie.title} Backdrop`,
+        },
         {
           url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
           width: 500,
           height: 750,
-          alt: movie.title || 'Movie Poster',
+          alt: `${movie.title} Poster`,
         },
       ],
+      type: 'video.movie',
+      releaseDate: movie.release_date,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${movie.title || 'Movie'} (${releaseYear}) | watchzone`,
+      description: description,
+      images: [`https://image.tmdb.org/t/p/w780${movie.backdrop_path || movie.poster_path}`],
     },
   };
 }
 
 async function getMovieDetails(id, userId) {
-  // ... (The internals of this function are fine)
   const token = process.env.TMDB_API_TOKEN;
   const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
   
@@ -92,58 +129,59 @@ async function getMovieDetails(id, userId) {
 }
 
 export default async function MoviePage({ params }) {
-  // --- THIS IS THE FIX ---
   const session = await getServerSession(authOptions);
   let userId = session?.user?.id || null;
-  // --- END OF FIX ---
-
-  // (The old, incorrect logic is removed)
-  // const cookieStore = cookies();
-  // const token = cookieStore.get('token')?.value;
-  // let userId = null;
-  // if (token) {
-  //   try {
-  //     const decoded = await verifyToken(token);
-  //     userId = decoded.id;
-  //   } catch (e) { /* Invalid token */ }
-  // }
 
   const movie = await getMovieDetails(params.id, userId);
 
-  // ... (rest of the component is unchanged)
-  if (!movie) return <div className="text-center py-20 text-foreground">Movie not found.</div>;
+  if (!movie) {
+    notFound(); // Triggers the 404 page
+  }
 
   const director = movie.credits?.crew.find((p) => p.job === 'Director');
   const cast = movie.credits?.cast.slice(0, 20);
   const backdropUrl = movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : '';
   const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
+  
+  // Create the JSON-LD data
+  const jsonLd = createJsonLd(movie, director);
 
   return (
-    // ... (rest of the JSX is unchanged)
     <div className="min-h-screen">
+      {/* ** NEW: JSON-LD Structured Data Script **
+        This script is invisible to users but tells Google details about this movie,
+        helping you get rich snippets (star ratings, etc.) in search results.
+      */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+      />
+      {/* End of JSON-LD Script */}
+
       {/* 1. Backdrop Image */}
       {backdropUrl && (
         <div className="absolute top-0 left-0 w-full h-[80vh] -z-10">
-          <Image src={backdropUrl} alt={`${movie.title} backdrop`} layout="fill" objectFit="cover" className="opacity-90 object-top" unoptimized={true} />
+          <Image src={backdropUrl} alt={`${movie.title} backdrop`} layout="fill" objectFit="cover" className="opacity-90 object-top" unoptimized={true} priority />
           {/* 2. Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         </div>
       )}
       
       {/* 3. Main Content Container */}
-      <div className="container mt-30 px-4 py-16 md:py-24">
+      <div className="container mt-30 px-4 py-16 md:py-24 ">
         <div className="md:flex md:gap-8">
           {/* 4. Poster */}
           <div className="md:w-1/4 flex-shrink-0 ">
             {posterUrl && (
               <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
-                <Image src={posterUrl} alt={movie.title} layout="fill" objectFit="cover" unoptimized={true} />
+                <Image src={posterUrl} alt={movie.title} layout="fill" objectFit="cover" unoptimized={true} priority />
               </div>
             )}
           </div>
           
           {/* 5. Details */}
           <div className="md:w-2/3 mt-8 md:mt-0">
+            {/* Use <h1> for the main title for SEO */}
             <h1 className="text-4xl md:text-5xl font-extrabold text-foreground">{movie.title}</h1>
             {movie.tagline && <p className="text-gray-500 text-lg italic mt-2">"{movie.tagline}"</p>}
             

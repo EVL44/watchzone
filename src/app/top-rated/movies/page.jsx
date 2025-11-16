@@ -1,9 +1,11 @@
 import TopRatedMovies from "@/components/TopRatedMovies";
 import Adsense from "@/components/Adsense"; 
 
+// Updated metadata to be more specific and include brand
 export const metadata = {
-  title: "watchzone - Top 300 Rated Movies",
-  description: "Browse the top 300 all-time rated movies, as ranked by users. Find your next great film to watch.",
+  title: "Top 300 Rated Movies", // The template in layout.jsx will add "| watchzone"
+  description: "Browse the top 300 all-time rated movies, as ranked by users on watchzone. Find your next great film to watch.",
+  keywords: ['top rated movies', 'best movies', 'movie rankings', 'watchzone', 'top 300 movies'],
 };
 
 export default function TopRatedPage() {

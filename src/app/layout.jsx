@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from './providers';
 import Footer from "../components/Footer";
 import Script from "next/script";
+import { metadata as siteMetadata } from './metadata'; // Import metadata
 
 const jetBrains_mono = JetBrains_Mono({
   subsets: ['latin'],
@@ -11,23 +12,16 @@ const jetBrains_mono = JetBrains_Mono({
   variable: '--font-jetBrains-mono',
 });
 
-export const metadata = {
-  title: "watchzone - Your Movie Platform",
-  description: "Watch your favorite movies and series.",
-  icons: {
-    icon: "\wzmax.png",
-  }
-};
-
+// Use the imported metadata
+export const metadata = { ...siteMetadata };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)" />
-        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        {/* Viewport and theme-color are automatically handled by Next.js metadata */}
         <link rel="apple-touch-icon" href="/wzmax.png"></link>
+        {/* manifest.json is also automatically added by Next.js if present in /public */}
       </head>
       <body className={jetBrains_mono.variable}>
         

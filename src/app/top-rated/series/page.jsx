@@ -1,6 +1,13 @@
 import TopRatedSeries from "@/components/TopRatedSeries";
 import Adsense from "@/components/Adsense"; 
 
+// ** NEW: Added metadata for this page **
+export const metadata = {
+  title: "Top 300 Rated TV Series", // The template in layout.jsx will add "| watchzone"
+  description: "Browse the top 300 all-time rated TV series, as ranked by users on watchzone. Find your next binge-watch.",
+  keywords: ['top rated series', 'best tv shows', 'tv series rankings', 'watchzone', 'top 300 series'],
+};
+
 export default function TopRatedSeriesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
