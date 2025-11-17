@@ -89,7 +89,7 @@ Cloudinary Account
 
 2. Clone the Repository
 
-git clone [https://github.com/](https://github.com/)EVL44/watchzone.git
+git clone [https://github.com/EVL44/watchzone.git](https://github.com/EVL44/watchzone.git)
 cd watchzone
 
 
