@@ -2,6 +2,8 @@ import PopularMovies from "../components/PopularMovies";
 import PopularSeries from "../components/PopularSeries";
 import Trending from "../components/Trending";
 import Adsense from "@/components/Adsense";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import HeroSearch from "@/components/HeroSearch"; // 1. Import the new component
 
 // Helper function to fetch trending items
@@ -26,6 +28,9 @@ async function getTrendingBackdrop() {
 
 
 export default async function Home() {
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
+
   const backgroundImage = await getTrendingBackdrop();
 
   return (
@@ -37,7 +42,12 @@ export default async function Home() {
         <div className="absolute inset-0 bg-primary opacity-40"></div>
         {/* 2. Update the z-10 container */}
         <div className="relative z-10 w-full px-4">
-          <h1 className="text-5xl md:text-6xl font-extrabold">Welcome to WatchZone</h1>
+          {user ? (
+            <h1 className="text-5xl md:text-6xl font-extrabold"> Welcome back <span>{user.username}</span></h1>
+          ):(
+            <h1 className="text-5xl md:text-6xl font-extrabold">Welcome to WatchZone</h1>
+          )}
+          
           <p className="text-xl md:text-2xl mt-4 mb-8">Your ultimate destination for discovering and tracking movies and TV shows.</p>
           
           <HeroSearch />
@@ -67,7 +77,6 @@ export default async function Home() {
           />
         </div>
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-foreground mb-6">Popular Movies</h2>
           <PopularMovies />
         </div>
         <div className="my-8">
@@ -79,7 +88,6 @@ export default async function Home() {
           />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-foreground mb-6">Popular Series</h2>
           <PopularSeries />
         </div>
       </div>

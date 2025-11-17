@@ -35,7 +35,7 @@ export default function Trending() {
   };
 
   return (
-    <div>
+    <div className='xl:mx-40'>
       <div className="flex items-center mb-6">
         <h2 className="text-3xl font-bold text-foreground mr-6">Trending</h2>
         <div className="flex border border-primary rounded-full">

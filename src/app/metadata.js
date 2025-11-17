@@ -10,9 +10,9 @@ export const metadata = {
 
   title: {
     // The default title for the site (e.g., on the homepage)
-    default: 'watchzone - Discover, Track, and Watch Movies & TV Series',
+    default: 'Watchzone - Discover, Track, and Watch Movies & TV Series',
     // The template for all other pages (e.g., "Movie Name | watchzone")
-    template: '%s | watchzone',
+    template: '%s - Watchzone',
   },
   description: "watchzone is your ultimate destination for discovering, tracking, and watching your favorite movies and TV series. Create watchlists, follow users, and join the conversation.",
   
@@ -35,16 +35,16 @@ export const metadata = {
 
   // Open Graph (for social media sharing)
   openGraph: {
-    title: 'watchzone - Discover, Track, and Watch Movies & TV Series',
+    title: 'Watchzone - Discover, Track, and Watch Movies & TV Series',
     description: 'Your ultimate destination for discovering and tracking movies and TV shows.',
     url: siteUrl,
-    siteName: 'watchzone',
+    siteName: 'Watchzone',
     images: [
       {
         url: '/wz1.png', // Relative to metadataBase (e.g., https://your-domain.com/wz1.png)
         width: 1200,
         height: 630,
-        alt: 'watchzone Logo',
+        alt: 'Watchzone Logo',
       },
     ],
     locale: 'en_US',
@@ -54,7 +54,7 @@ export const metadata = {
   // Twitter Card (for Twitter sharing)
   twitter: {
     card: 'summary_large_image',
-    title: 'watchzone - Discover, Track, and Watch Movies & TV Series',
+    title: 'Watchzone - Discover, Track, and Watch Movies & TV Series',
     description: 'Your ultimate destination for discovering and tracking movies and TV shows.',
     images: ['/wz1.png'], // Relative to metadataBase
   },

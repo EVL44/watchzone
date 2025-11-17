@@ -27,8 +27,6 @@ model User {
   avatarUrl       String?
 
   roles           Role[]    @default([])
-  
-  // --- ADDED CREATEDAT FIELD ---
   createdAt       DateTime  @default(now())
 
   favoriteMovieIds   String[] @db.ObjectId
