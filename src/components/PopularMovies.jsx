@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaStar } from 'react-icons/fa';
 import Link from 'next/link';
+import PosterGridSkeleton from './PosterGridSkeleton'; // 1. Import skeleton
 
 export default function PopularMovies() {
   const [movies, setMovies] = useState([]);
@@ -30,13 +31,11 @@ export default function PopularMovies() {
   }, []);
 
   if (loading) {
+    // 2. Use PosterGridSkeleton
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {Array.from({ length: 10 }).map((_, index) => (
-          <div key={index} className="bg-secondary rounded-lg animate-pulse">
-            <div className="w-full h-64 sm:h-80 md:h-96 bg-stone-700 rounded-lg"></div>
-          </div>
-        ))}
+      <div className='xl:mx-40'>
+        <h2 className="text-3xl font-bold text-foreground mb-6">Popular Movies</h2>
+        <PosterGridSkeleton count={10} />
       </div>
     );
   }
@@ -47,7 +46,7 @@ export default function PopularMovies() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {movies.map((movie) => (
           <Link href={`/movie/${movie.id}`} key={movie.id}>
-            <div className="bg-secondary rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer group">
+            <div className="bg-secondary rounded-lg overflow-hidden transform transition-transform duration-300 ease-in-out cursor-pointer group">
               <Image 
                   src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                   alt={movie.title}

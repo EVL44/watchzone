@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import SearchResults from '@/components/SearchResults';
+import HeroSearch from "@/components/HeroSearch";
 
 export default function SearchPage() {
   return (

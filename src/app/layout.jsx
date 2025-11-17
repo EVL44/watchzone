@@ -1,10 +1,10 @@
 import { JetBrains_Mono } from "next/font/google";
-import Nav from "../components/Nav";
-import "./globals.css";
-import { Providers } from './providers';
-import Footer from "../components/Footer";
+import Nav from "@/components/Nav";
+import "@/app/globals.css";
+import { Providers } from '@/app/providers';
+import Footer from "@/components/Footer";
 import Script from "next/script";
-import { metadata as siteMetadata } from './metadata'; // Import metadata
+import { metadata as siteMetadata } from '@/app/metadata'; // Import metadata
 
 const jetBrains_mono = JetBrains_Mono({
   subsets: ['latin'],
@@ -34,7 +34,8 @@ export default function RootLayout({ children }) {
         
         <Providers>
           <Nav />
-          <main>
+          {/* Add padding-bottom on mobile (md:pb-0) to prevent bottom nav from covering content */}
+          <main className="pb-20 md:pb-0">
             {children}
           </main>
           <Footer />

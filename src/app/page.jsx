@@ -4,7 +4,7 @@ import Trending from "../components/Trending";
 import Adsense from "@/components/Adsense";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import HeroSearch from "@/components/HeroSearch"; // 1. Import the new component
+import HeroSearch from "@/components/HeroSearch";
 
 // Helper function to fetch trending items
 async function getTrendingBackdrop() {
@@ -36,7 +36,7 @@ export default async function Home() {
   return (
     <>
       <div 
-        className="relative h-[60vh] flex items-center justify-center text-white text-center px-4 bg-cover bg-center" 
+        className="relative h-[65vh] flex items-center justify-center text-foreground text-center px-4 bg-cover bg-center" 
         style={{ backgroundImage: `url('${backgroundImage}')` }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
@@ -45,7 +45,7 @@ export default async function Home() {
           {user ? (
             <h1 className="text-5xl md:text-6xl font-extrabold"> Welcome back <span className="text-primary">{user.username}</span></h1>
           ):(
-            <h1 className="text-5xl md:text-6xl font-extrabold">Welcome to <span className="text-primary">Watchzone</span></h1>
+            <h1 className="text-5xl md:text-6xl font-extrabold">WELCOME TO <span className="text-primary">WATCHZONE</span></h1>
           )}
           
           <p className="text-xl md:text-2xl mt-4 mb-8">Your ultimate destination for discovering and tracking movies and TV shows.</p>

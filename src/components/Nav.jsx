@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaBars, FaSearch, FaTimes, FaAngleDown, FaUserCircle, FaFilm, FaTv } from 'react-icons/fa';
+// 1. Import new icons
+import { FaBars, FaSearch, FaTimes, FaAngleDown, FaUserCircle, FaFilm, FaTv, FaHome, FaStar } from 'react-icons/fa';
 import { User, Settings, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
@@ -82,8 +83,11 @@ export default function Nav() {
 
   const searchInputClassName = 'w-full bg-secondary text-foreground placeholder-foreground/70 border border-transparent rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary';
 
+  const profileLink = user ? (user.username ? `/user/${user.username}` : '/profile') : '/login';
+
   return (
     <>
+      {/* 2. Top Nav (sticky, standard background) */}
       <nav className="bg-background shadow-md sticky top-0 z-20">
         <div className="max-w-7xl xl:mx-40 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -179,13 +183,40 @@ export default function Nav() {
                   </>
                 )}
               </div>
-              <div className="md:hidden flex items-center"><ThemeToggle /><button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-primary p-2">{isMenuOpen ? <FaTimes size={24}/> : <FaBars size={24}/>}</button></div>
+              {/* 3. Mobile top-right: Only ThemeToggle. Hamburger is moved. */}
+              <div className="md:hidden flex items-center">
+                <ThemeToggle />
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* 4. NEW: Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-surface border-t border-secondary z-20 flex justify-around items-center px-2">
+        <Link href="/" className="flex flex-col items-center justify-center text-foreground/70 hover:text-primary">
+          <FaHome size={24} />
+          <span className="text-xs mt-1">Home</span>
+        </Link>
+        <Link href="/search" className="flex flex-col items-center justify-center text-foreground/70 hover:text-primary">
+          <FaSearch size={24} />
+          <span className="text-xs mt-1">Search</span>
+        </Link>
+        <Link href="/top-rated/movies" className="flex flex-col items-center justify-center text-foreground/70 hover:text-primary">
+          <FaStar size={24} />
+          <span className="text-xs mt-1">Top Rated</span>
+        </Link>
+        <Link href={profileLink} className="flex flex-col items-center justify-center text-foreground/70 hover:text-primary">
+          <FaUserCircle size={24} />
+          <span className="text-xs mt-1">{user ? "Profile" : "Sign In"}</span>
+        </Link>
+        <button onClick={() => setIsMenuOpen(true)} className="flex flex-col items-center justify-center text-foreground/70 hover:text-primary">
+          <FaBars size={24} />
+          <span className="text-xs mt-1">Menu</span>
+        </button>
+      </nav>
+
+      {/* 5. Existing Mobile Menu (now opened by bottom nav) */}
       <div className={`fixed top-0 left-0 w-full h-screen bg-surface z-50 transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:hidden`}>
         <div className="flex justify-between items-center p-4 border-b border-secondary">
           <Link href="/" onClick={closeMenu} className="text-2xl font-bold text-primary">Kentar</Link>
