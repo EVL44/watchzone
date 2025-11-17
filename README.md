@@ -54,7 +54,7 @@ watchzone is a full-stack web application built with the Next.js App Router, Pri
 </td>
 <td width="50%" align="center">
 <b>Movie Detail Page</b>
-<img src="public/wz2.png" alt="Movie Detail Page Demo">
+<img src="public/wz5.png" alt="Movie Detail Page Demo">
 </td>
 </tr>
 <tr>
@@ -89,7 +89,7 @@ Cloudinary Account
 
 2. Clone the Repository
 
-git clone [https://github.com/](https://github.com/)[YOUR-USERNAME]/watchzone.git
+git clone [https://github.com/](https://github.com/)EVL44/watchzone.git
 cd watchzone
 
 

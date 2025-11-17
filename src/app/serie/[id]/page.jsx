@@ -83,7 +83,7 @@ export async function generateMetadata({ params }) {
           alt: `${serie.name} Poster`,
         },
       ],
-      type: 'video.tv_series',
+      type: 'video.tv_show',
     },
     twitter: {
       card: 'summary_large_image',
