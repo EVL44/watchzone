@@ -11,7 +11,7 @@ export default function Footer() {
   return (
     <footer className="bg-secondary text-foreground/70 border-t border-secondary/50 mt-16">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+        <div className="xl:mx-40 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
           
           {/* Column 1: Greeting & Brand */}
           <div>

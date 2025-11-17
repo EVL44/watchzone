@@ -165,7 +165,7 @@ export default async function SerieDetailsPage({ params }) {
       
       {/* 3. Main Content Container */}
       <div className="container mt-30 px-4 py-16 md:py-24 ">
-        <div className="md:flex md:gap-8">
+        <div className="xl:mx-40 md:flex md:gap-8">
           {/* 4. Poster */}
           <div className="md:w-1/4 flex-shrink-0">
             {posterUrl && (
@@ -211,7 +211,7 @@ export default async function SerieDetailsPage({ params }) {
         </div>
         
         {/* 6. Ad and Cast (Unchanged) */}
-        <div className="my-8">
+        <div className=" xl:mx-40 my-8">
           <Adsense
             adSlot="9095823329"
             style={{ display: 'block' }}
@@ -220,7 +220,7 @@ export default async function SerieDetailsPage({ params }) {
           />
         </div>
         {cast?.length > 0 && (
-          <div className="mt-12 relative">
+          <div className="xl:mx-40 mt-12 relative">
             <h2 className="text-3xl font-bold text-foreground mb-4">Top Billed Cast</h2>
             <div className="flex overflow-x-auto gap-5 pb-4 custom-scrollbar">
               {cast.map(actor => <CastCard key={actor.id} actor={actor} />)}
@@ -230,8 +230,10 @@ export default async function SerieDetailsPage({ params }) {
         )}
         
         {/* 7. New Sections (Kept) */}
-        <Recommendations tmdbId={serie.id} mediaType="series" />
-        <CommentSection tmdbId={serie.id} mediaType="series" />
+        <div className='xl:mx-40'>
+          <Recommendations tmdbId={serie.id} mediaType="series" />
+          <CommentSection tmdbId={serie.id} mediaType="series" />
+        </div>
       </div>
     </div>
   );

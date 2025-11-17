@@ -39,13 +39,13 @@ export default async function Home() {
         className="relative h-[60vh] flex items-center justify-center text-white text-center px-4 bg-cover bg-center" 
         style={{ backgroundImage: `url('${backgroundImage}')` }}
       >
-        <div className="absolute inset-0 bg-primary opacity-40"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
         {/* 2. Update the z-10 container */}
         <div className="relative z-10 w-full px-4">
           {user ? (
-            <h1 className="text-5xl md:text-6xl font-extrabold"> Welcome back <span>{user.username}</span></h1>
+            <h1 className="text-5xl md:text-6xl font-extrabold"> Welcome back <span className="text-primary">{user.username}</span></h1>
           ):(
-            <h1 className="text-5xl md:text-6xl font-extrabold">Welcome to WatchZone</h1>
+            <h1 className="text-5xl md:text-6xl font-extrabold">Welcome to <span className="text-primary">Watchzone</span></h1>
           )}
           
           <p className="text-xl md:text-2xl mt-4 mb-8">Your ultimate destination for discovering and tracking movies and TV shows.</p>
