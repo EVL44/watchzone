@@ -14,10 +14,14 @@ async function getTrendingBackdrop() {
       throw new Error('Failed to fetch trending data');
     }
     const data = await res.json();
+    console.warn("data :", data);
+
     const itemsWithBackdrops = data.filter(item => item.backdrop_path);
-    
+    console.warn("item with back drop : ",itemsWithBackdrops);
+
     if (itemsWithBackdrops.length > 0) {
       const randomItem = itemsWithBackdrops[Math.floor(Math.random() * itemsWithBackdrops.length)];
+      console.warn("random item", randomItem);
       return `https://image.tmdb.org/t/p/original${randomItem.backdrop_path}`;
     }
   } catch (error) {
