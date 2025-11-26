@@ -47,13 +47,17 @@ export default async function Home() {
         {/* 2. Update the z-10 container */}
         <div className="relative z-10 w-full px-4">
           {user ? (
-            <h1 className="text-5xl md:text-6xl font-extrabold"> Welcome back <span className="text-primary">{user.username}</span></h1>
+            <>
+              <h1 className="text-5xl md:text-6xl font-extrabold"> Welcome back <span className="text-primary">{user.username}</span></h1>
+              <p className="text-xl md:text-2xl mt-4 mb-8">Here is some movies and series you may like.</p>
+              
+            </>
           ):(
-            <h1 className="text-5xl md:text-6xl font-extrabold">WELCOME TO <span className="text-primary">WATCHZONE</span></h1>
+            <>
+              <h1 className="text-5xl md:text-6xl font-extrabold">WELCOME TO <span className="text-primary">WATCHZONE</span></h1>
+              <p className="text-xl md:text-2xl mt-4 mb-8">Your ultimate destination for discovering and tracking movies and TV shows.</p>
+            </>
           )}
-          
-          <p className="text-xl md:text-2xl mt-4 mb-8">Your ultimate destination for discovering and tracking movies and TV shows.</p>
-          
           <HeroSearch />
           
         </div>
