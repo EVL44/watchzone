@@ -3,34 +3,42 @@
 import { useState, useEffect } from 'react';
 import { FaTimes, FaDownload, FaMagnet } from 'react-icons/fa';
 
-export default function DownloadModal({ imdbId, title, onClose }) {
+export default function DownloadModal({ imdbId, title, year, onClose }) {
   const [torrents, setTorrents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchTorrents = async () => {
-      if (!imdbId) {
-        setError("No IMDB ID provided.");
+      if (!imdbId && !title) {
+        setError("No identifiers provided.");
         setLoading(false);
         return;
       }
 
       try {
-        // Call the internal API route
-        const res = await fetch(`/api/torrents?imdbId=${imdbId}`);
+        // Pass ID, Title and Year to allow the API to fallback intelligently
+        const queryParams = new URLSearchParams({
+            imdbId: imdbId || '',
+            title: title || '',
+            year: year || ''
+        });
+
+        const res = await fetch(`/api/torrents?${queryParams}`);
         
-        if (!res.ok) {
-            // If the internal API fails (500 or 400 error)
-            throw new Error('Failed to fetch torrent data');
-        }
+        if (!res.ok) throw new Error('Failed to fetch torrent data');
 
         const data = await res.json();
 
         if (data.status === 'ok' && data.data.movie_count > 0) {
-          // YTS returns a list, we take the first match
+          // YTS returns a list, we take the first/best match
           const movie = data.data.movies[0];
-          setTorrents(movie.torrents || []);
+          let movieTorrents = movie.torrents || [];
+          
+          // Sort by seeds (descending) to show best options first
+          movieTorrents.sort((a, b) => b.seeds - a.seeds);
+          
+          setTorrents(movieTorrents);
         } else {
           setError("No download links found for this title.");
         }
@@ -43,7 +51,7 @@ export default function DownloadModal({ imdbId, title, onClose }) {
     };
 
     fetchTorrents();
-  }, [imdbId]);
+  }, [imdbId, title, year]);
 
   const getMagnetLink = (hash, movieTitle) => {
     return `magnet:?xt=urn:btih:${hash}&dn=${encodeURIComponent(movieTitle)}&tr=udp://open.demonii.com:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969`;

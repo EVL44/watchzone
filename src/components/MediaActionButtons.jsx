@@ -6,7 +6,7 @@ import { FaBookmark, FaHeart, FaList, FaPlay, FaDownload } from 'react-icons/fa'
 import { useAuth } from '@/context/AuthContext';
 import AddToListModal from '@/components/AddToListModal';
 import TrailerModal from '@/components/TrailerModal';
-import DownloadModal from '@/components/DownloadModal'; // Import new modal
+import DownloadModal from '@/components/DownloadModal';
 
 export default function MediaActionButtons({ item, itemType, initialFavorite, initialWatchlisted, trailer }) {
   const { user, updateUserContext } = useAuth();
@@ -16,9 +16,8 @@ export default function MediaActionButtons({ item, itemType, initialFavorite, in
   const [isWatchlisted, setIsWatchlisted] = useState(initialWatchlisted);
   const [showAddToList, setShowAddToList] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
-  const [showDownload, setShowDownload] = useState(false); // State for download modal
+  const [showDownload, setShowDownload] = useState(false);
 
-  // Update status if user logs in/out while on the page
   useEffect(() => {
     setIsFavorite(initialFavorite);
     setIsWatchlisted(initialWatchlisted);
@@ -49,16 +48,19 @@ export default function MediaActionButtons({ item, itemType, initialFavorite, in
     }
   }, [user, router, updateUserContext, item.id, itemType, isFavorite, isWatchlisted]);
 
+  // Extract Release Year safely
+  const releaseYear = item.release_date ? new Date(item.release_date).getFullYear() : null;
+
   return (
     <>
       {showTrailer && <TrailerModal trailerKey={trailer?.key} onClose={() => setShowTrailer(false)} />}
       {showAddToList && <AddToListModal item={item} itemType={itemType} onClose={() => setShowAddToList(false)} />}
       
-      {/* Render Download Modal if active */}
       {showDownload && (
         <DownloadModal 
-            imdbId={item.imdb_id} // Pass the IMDB ID
+            imdbId={item.imdb_id} 
             title={item.title || item.name} 
+            year={releaseYear} // Pass the year here
             onClose={() => setShowDownload(false)} 
         />
       )}
@@ -78,8 +80,8 @@ export default function MediaActionButtons({ item, itemType, initialFavorite, in
             </button>
         )}
 
-        {/* Only show download button for Movies, and if we have an IMDB ID */}
-        {itemType === 'movie' && item.imdb_id && (
+        {/* Only show download button for Movies */}
+        {itemType === 'movie' && (
             <button onClick={() => setShowDownload(true)} className="flex items-center gap-2 bg-secondary hover:bg-stone-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                 <FaDownload /><span>Download</span>
             </button>
