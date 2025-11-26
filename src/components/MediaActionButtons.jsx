@@ -60,12 +60,13 @@ export default function MediaActionButtons({ item, itemType, initialFavorite, in
         <DownloadModal 
             imdbId={item.imdb_id} 
             title={item.title || item.name} 
-            year={releaseYear} // Pass the year here
+            year={releaseYear}
             onClose={() => setShowDownload(false)} 
         />
       )}
       
-      <div className="flex flex-wrap items-center gap-4 mt-6">
+      {/* Updated Container: Center on mobile, Start on desktop */}
+      <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-6 w-full">
         {user && (
           <>
             <button onClick={() => handleListAction('watchlist')} className={`bg-stone-700 font-bold p-3 rounded-full transition-colors ${isWatchlisted ? 'text-primary' : 'text-white hover:text-primary'}`} title="Add to Watchlist"><FaBookmark /></button>
@@ -75,14 +76,16 @@ export default function MediaActionButtons({ item, itemType, initialFavorite, in
         )}
         
         {trailer && (
-            <button onClick={() => setShowTrailer(true)} className="flex items-center gap-2 bg-primary hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+            /* Updated Button: Full width on mobile, auto on small screens and up */
+            <button onClick={() => setShowTrailer(true)} className="flex items-center justify-center gap-2 bg-primary hover:bg-opacity-80 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full sm:w-auto">
                 <FaPlay /><span>Trailer</span>
             </button>
         )}
 
         {/* Only show download button for Movies */}
         {itemType === 'movie' && (
-            <button onClick={() => setShowDownload(true)} className="flex items-center gap-2 bg-secondary hover:bg-stone-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+            /* Updated Button: Full width on mobile, auto on small screens and up */
+            <button onClick={() => setShowDownload(true)} className="flex items-center justify-center gap-2 bg-secondary hover:bg-stone-600 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full sm:w-auto">
                 <FaDownload /><span>Download</span>
             </button>
         )}
