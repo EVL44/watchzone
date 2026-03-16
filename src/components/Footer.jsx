@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 export default function Footer() {
@@ -23,7 +24,7 @@ export default function Footer() {
                   height={15} // Added height
                   className="h-auto transition-transform duration-500 group-hover:scale-110 "
                   priority={true} 
-                  unoptimized={true}
+                  loader={cloudinaryLoader}
                 />
                 <h2 className="text-xl font-bold text-primary ">watchzone</h2>
             </div>

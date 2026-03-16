@@ -2,6 +2,7 @@
 'use client';
 
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 
 // List of some popular free, ad-supported providers
 // You can add more provider names here if you wish

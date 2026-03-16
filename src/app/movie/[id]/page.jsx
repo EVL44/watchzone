@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaStar, FaClock, FaCalendarAlt, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
 import { getServerSession } from 'next-auth/next';
@@ -57,18 +58,18 @@ export async function generateMetadata({ params }) {
   
   // SEO-optimized description
   const description = movie.overview 
-    ? `Discover details, cast, trailers, and reviews for ${movie.title} (${releaseYear}). Track, rate, and add ${movie.title} to your watchlist on watchzone.`
-    : `Details for ${movie.title} (${releaseYear}) on watchzone.`;
+    ? `Watch ${movie.title} (${releaseYear}) full movie online on watchzone. Discover details, cast, trailers, and reviews. Track, rate, and add ${movie.title} to your watchlist.`
+    : `Watch ${movie.title} (${releaseYear}) on watchzone.`;
 
   return {
     // CRITICAL FIX: "watchwone" -> "watchzone"
-    // The template from layout.jsx will automatically add "| watchzone"
-    title: `${movie.title || 'Movie'} (${releaseYear})`,
+    // The template from layout.jsx will automatically add " - Watchzone"
+    title: `Watch ${movie.title || 'Movie'} (${releaseYear})`,
     description: description,
     
     // Open Graph data for rich social sharing
     openGraph: {
-      title: `${movie.title || 'Movie'} (${releaseYear}) | watchzone`,
+      title: `Watch ${movie.title || 'Movie'} (${releaseYear}) | watchzone`,
       description: description,
       images: [
         {
@@ -89,7 +90,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${movie.title || 'Movie'} (${releaseYear}) | watchzone`,
+      title: `Watch ${movie.title || 'Movie'} (${releaseYear}) | watchzone`,
       description: description,
       images: [`https://image.tmdb.org/t/p/w780${movie.backdrop_path || movie.poster_path}`],
     },
@@ -98,7 +99,10 @@ export async function generateMetadata({ params }) {
 
 async function getMovieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
-  const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
+  const options = { 
+    headers: { accept: 'application/json', Authorization: `Bearer ${token}` },
+    next: { revalidate: 3600 } 
+  };
   
   const [detailsRes, creditsRes, videosRes] = await Promise.all([
     fetch(`https://api.themoviedb.org/3/movie/${id}?language=en-US`, options),
@@ -113,16 +117,48 @@ async function getMovieDetails(id, userId) {
   const videosData = await videosRes.json();
   movie.trailer = videosData.results?.find(v => v.type === 'Trailer') || videosData.results?.[0];
 
-  if (userId) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { favoriteMovies: { select: { tmdbId: true } }, watchlistMovies: { select: { tmdbId: true } } }
+  // Fetch community ratings from our DB
+  let ratings = [];
+  try {
+    ratings = await prisma.rating.findMany({
+      where: { tmdbId: movie.id, mediaType: 'movie' },
     });
-    movie.isFavorite = user?.favoriteMovies.some(m => m.tmdbId === movie.id) || false;
-    movie.isWatchlisted = user?.watchlistMovies.some(m => m.tmdbId === movie.id) || false;
+  } catch (err) {
+    console.error('Rating fetch error:', err.message);
+  }
+  const totalRatings = ratings.length;
+  const averageScore = totalRatings > 0
+    ? Math.round((ratings.reduce((sum, r) => sum + r.score, 0) / totalRatings) * 10) / 10
+    : 0;
+
+  movie.ratingData = { averageScore, totalRatings, userRating: null };
+
+  if (userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { 
+          favoriteMovies: { select: { tmdbId: true } }, 
+          watchlistMovies: { select: { tmdbId: true } },
+          watchedMovies: { select: { tmdbId: true } },
+        }
+      });
+      movie.isFavorite = user?.favoriteMovies.some(m => m.tmdbId === movie.id) || false;
+      movie.isWatchlisted = user?.watchlistMovies.some(m => m.tmdbId === movie.id) || false;
+      movie.isWatched = user?.watchedMovies.some(m => m.tmdbId === movie.id) || false;
+
+      const userRating = ratings.find(r => r.userId === userId);
+      if (userRating) movie.ratingData.userRating = userRating;
+    } catch (err) {
+      console.error('User data fetch error:', err.message);
+      movie.isFavorite = false;
+      movie.isWatchlisted = false;
+      movie.isWatched = false;
+    }
   } else {
     movie.isFavorite = false;
     movie.isWatchlisted = false;
+    movie.isWatched = false;
   }
 
   return movie;
@@ -191,17 +227,19 @@ export default async function MoviePage({ params }) {
               <div className="flex items-center gap-2"><FaCalendarAlt /><span>{new Date(movie.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
             </div>
             
-            <div className="flex flex-col md:flex-row md:items-center">
+            <div className="flex flex-wrap items-start gap-4 mt-6">
               <MediaActionButtons 
                 item={movie} 
                 itemType="movie"
                 initialFavorite={movie.isFavorite}
                 initialWatchlisted={movie.isWatchlisted}
+                initialWatched={movie.isWatched}
                 trailer={movie.trailer}
+                ratingData={movie.ratingData}
               />
               <Link 
                 href={`/watch/movie/${params.id}`} 
-                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-4 md:mt-6 md:ml-4 w-full md:w-auto"
+                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 md:py-2 md:px-4 rounded-lg transition-colors w-full sm:w-auto"
               >
                 <FaPlay />
                 <span>Watch Now</span>

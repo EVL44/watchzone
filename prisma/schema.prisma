@@ -25,19 +25,30 @@ model User {
   emailVerified   DateTime?
   image           String?
   avatarUrl       String?
+  bio             String?
+  bannerUrl       String?
 
   roles           Role[]    @default([])
   createdAt       DateTime  @default(now())
+  isDeactivated   Boolean   @default(false)
+  
+  banExpires      DateTime? // Ban expiration timestamp
+  banReason       String?   // Reason for ban
 
   favoriteMovieIds   String[] @db.ObjectId
   watchlistMovieIds  String[] @db.ObjectId
+  watchedMovieIds    String[] @db.ObjectId
   favoriteSeriesIds  String[] @db.ObjectId
   watchlistSeriesIds String[] @db.ObjectId
+  watchedSeriesIds   String[] @db.ObjectId
   favoriteMovies     Movie[]  @relation("FavoriteMovies", fields: [favoriteMovieIds], references: [id])
   watchlistMovies    Movie[]  @relation("WatchlistMovies", fields: [watchlistMovieIds], references: [id])
+  watchedMovies      Movie[]  @relation("WatchedMovies", fields: [watchedMovieIds], references: [id])
   favoriteSeries     Series[] @relation("FavoriteSeries", fields: [favoriteSeriesIds], references: [id])
   watchlistSeries    Series[] @relation("WatchlistSeries", fields: [watchlistSeriesIds], references: [id])
+  watchedSeries      Series[] @relation("WatchedSeries", fields: [watchedSeriesIds], references: [id])
   playlists          Playlist[]
+  ratings            Rating[]
   followers          Follow[] @relation("Following")
   following          Follow[] @relation("Follower")
 
@@ -56,8 +67,10 @@ model Movie {
   releaseDate        String?
   favoritedByIds     String[]   @db.ObjectId
   watchlistedByIds   String[]   @db.ObjectId
+  watchedByIds       String[]   @db.ObjectId
   favoritedBy        User[]     @relation("FavoriteMovies", fields: [favoritedByIds], references: [id])
   watchlistedBy      User[]     @relation("WatchlistMovies", fields: [watchlistedByIds], references: [id])
+  watchedBy          User[]     @relation("WatchedMovies", fields: [watchedByIds], references: [id])
   playlists          Playlist[] @relation("PlaylistMovies", fields: [playlistIds], references: [id])
   playlistIds        String[]   @db.ObjectId
 }
@@ -70,10 +83,29 @@ model Series {
   firstAirDate       String?
   favoritedByIds     String[]   @db.ObjectId
   watchlistedByIds   String[]   @db.ObjectId
+  watchedByIds       String[]   @db.ObjectId
   favoritedBy        User[]     @relation("FavoriteSeries", fields: [favoritedByIds], references: [id])
   watchlistedBy      User[]     @relation("WatchlistSeries", fields: [watchlistedByIds], references: [id])
+  watchedBy          User[]     @relation("WatchedSeries", fields: [watchedByIds], references: [id])
   playlists          Playlist[] @relation("PlaylistSeries", fields: [playlistIds], references: [id])
   playlistIds        String[]   @db.ObjectId
+}
+
+model Rating {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  score     Float    // 0.5 to 5.0 (half-star increments)
+  review    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
+
+  tmdbId    Int
+  mediaType String   // "movie" or "series"
+
+  @@unique([userId, tmdbId, mediaType])
+  @@index([tmdbId, mediaType])
 }
 
 model Playlist {
@@ -123,6 +155,23 @@ model Session {
   userId       String   @db.ObjectId
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OtpToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model OtpRateLimit {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  email          String   @unique
+  attempts       Int      @default(0)
+  windowStartsAt DateTime @default(now())
 }
 
 model VerificationToken {

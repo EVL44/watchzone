@@ -3,6 +3,7 @@
 'use client';
 
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import Link from 'next/link';
 import { FaThList } from 'react-icons/fa';
 
@@ -30,7 +31,7 @@ export default function PlaylistCard({ playlist }) {
                   layout="fill"
                   objectFit="cover"
                   className="transition-transform duration-500 group-hover:scale-110"
-                  unoptimized={true}
+                  loader={cloudinaryLoader}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

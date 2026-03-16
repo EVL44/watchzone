@@ -41,6 +41,13 @@ export const authOptions = {
         if (!user || !user.password) {
           throw new Error("Invalid credentials");
         }
+        if (user.banExpires && new Date(user.banExpires) > new Date()) {
+          const expirationDate = new Date(user.banExpires).toLocaleString();
+          throw new Error(`ACCOUNT BANNED: ${user.banReason || 'Rule violation'}. Expires: ${expirationDate}`);
+        }
+        if (user.isDeactivated) {
+          throw new Error("Account deactivated. Please sign up with this email to reactivate your account.");
+        }
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
@@ -81,6 +88,23 @@ export const authOptions = {
   },
 
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (account?.provider === 'google') {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email }
+        });
+        if (dbUser) {
+          if (dbUser.banExpires && new Date(dbUser.banExpires) > new Date()) {
+            const expirationDate = new Date(dbUser.banExpires).toLocaleString();
+            throw new Error(`ACCOUNT BANNED: ${dbUser.banReason || 'Rule violation'}. Expires: ${expirationDate}`);
+          }
+          if (dbUser.isDeactivated) {
+             throw new Error("Account deactivated. Please sign up to reactivate your account.");
+          }
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         const dbUser = await prisma.user.findUnique({

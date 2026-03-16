@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { FaUserCircle, FaTrash, FaHeart, FaReply } from 'react-icons/fa';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import Badges from '@/components/Badges'; // No change needed here
 import Link from 'next/link';
 
@@ -75,7 +76,7 @@ function CommentForm({ tmdbId, mediaType, onCommentPosted, parentId = null, onCa
     <form onSubmit={handleSubmit} className="flex gap-4">
       <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold overflow-hidden relative">
         {user.avatarUrl ? (
-          <Image src={user.avatarUrl} alt={user.username || user.name} layout="fill" objectFit="cover" unoptimized={true} />
+          <Image src={user.avatarUrl} alt={user.username || user.name} layout="fill" objectFit="cover" loader={cloudinaryLoader} />
         ) : (
           <FaUserCircle size={24} />
         )}
@@ -127,7 +128,7 @@ function CommentItem({ comment, user, onDelete, onLike, onReplyPosted }) {
       <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold overflow-hidden relative">
         <Link href={`/user/${username}`}>
           {comment.user.avatarUrl ? (
-            <Image src={comment.user.avatarUrl} alt={username} layout="fill" objectFit="cover" unoptimized={true} />
+            <Image src={comment.user.avatarUrl} alt={username} layout="fill" objectFit="cover" loader={cloudinaryLoader} />
           ) : (
             <FaUserCircle size={24} />
           )}

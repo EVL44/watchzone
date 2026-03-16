@@ -2,6 +2,7 @@
 
 import { FaTimes, FaUserCircle } from 'react-icons/fa';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import Link from 'next/link';
 
 export default function UserListModal({ isOpen, title, users, onClose }) {
@@ -24,7 +25,7 @@ export default function UserListModal({ isOpen, title, users, onClose }) {
                   <Link href={`/user/${user.username}`} onClick={onClose} className="flex items-center gap-4 p-2 rounded-md hover:bg-secondary">
                     <div className="w-12 h-12 rounded-full bg-primary flex-shrink-0 overflow-hidden relative">
                       {user.avatarUrl ? (
-                        <Image src={user.avatarUrl} alt={user.username} layout="fill" objectFit="cover" unoptimized={true} />
+                        <Image src={user.avatarUrl} alt={user.username} layout="fill" objectFit="cover" loader={cloudinaryLoader} />
                       ) : (
                         <FaUserCircle className="w-full h-full text-white" />
                       )}
@@ -42,3 +43,4 @@ export default function UserListModal({ isOpen, title, users, onClose }) {
     </div>
   );
 }
+

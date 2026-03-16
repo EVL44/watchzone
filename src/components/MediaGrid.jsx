@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 
 export default function MediaGrid({ items, title }) {
   return (
     <div>
       <h3 className="text-2xl font-bold mb-4">{title}</h3>
       {items && items.length > 0 ? (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {items.map(item => {
             const itemType = item.title ? 'movie' : 'serie';
             const tmdbId = item.tmdbId || item.id;

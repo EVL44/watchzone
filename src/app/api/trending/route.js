@@ -15,7 +15,8 @@ export async function GET(request) {
     headers: {
       accept: 'application/json',
       Authorization: `Bearer ${token}`
-    }
+    },
+    next: { revalidate: 3600 } // Cache for 1 hour to prevent TMDB rate limits
   };
 
   try {

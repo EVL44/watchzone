@@ -15,14 +15,21 @@ export async function DELETE(request) {
   try {
     const userId = token.id; // 3. Get the ID from the token
 
-    // Delete the user from the database
-    await prisma.user.delete({
+    // Soft delete the user by anonymizing and deactivating the profile
+    await prisma.user.update({
       where: { id: userId },
+      data: {
+        isDeactivated: true,
+        name: 'watchzone user',
+        username: `${userId}_deactivated`,
+        avatarUrl: null,
+        image: null,
+      }
     });
 
     // 4. Just return a success message.
     // The client will handle the sign-out.
-    return NextResponse.json({ message: 'Account successfully deleted.' });
+    return NextResponse.json({ message: 'Account successfully deactivated.' });
 
   } catch (error) {
     console.error('Account Deletion Error:', error);

@@ -16,11 +16,13 @@ export async function POST(request) {
     const body = await request.json();
 
     // --- Logic for Username/Avatar Updates ---
-    if (body.username || body.avatarUrl) {
-      const { username, avatarUrl } = body;
+    if (body.username || body.avatarUrl || body.bio !== undefined || body.bannerUrl) {
+      const { username, avatarUrl, bio, bannerUrl } = body;
       const updateData = {};
       if (username) updateData.username = username;
       if (avatarUrl) updateData.avatarUrl = avatarUrl;
+      if (bio !== undefined) updateData.bio = bio;
+      if (bannerUrl) updateData.bannerUrl = bannerUrl;
 
       if (Object.keys(updateData).length === 0) {
         return NextResponse.json({ message: 'No update data provided' }, { status: 400 });
@@ -29,7 +31,7 @@ export async function POST(request) {
       const user = await prisma.user.update({
         where: { id: userId },
         data: updateData,
-        include: { favoriteMovies: true, watchlistMovies: true, favoriteSeries: true, watchlistSeries: true }
+        include: { favoriteMovies: true, watchlistMovies: true, watchedMovies: true, favoriteSeries: true, watchlistSeries: true, watchedSeries: true }
       });
       
       const { password: _, ...userToReturn } = user;
@@ -45,8 +47,8 @@ export async function POST(request) {
         // 1. Determine which model and field to update
         const modelName = itemType === 'movie' ? 'movie' : 'series';
         const fieldToUpdate = {
-          movie: { favorites: 'favoriteMovieIds', watchlist: 'watchlistMovieIds' },
-          series: { favorites: 'favoriteSeriesIds', watchlist: 'watchlistSeriesIds' },
+          movie: { favorites: 'favoriteMovieIds', watchlist: 'watchlistMovieIds', watched: 'watchedMovieIds' },
+          series: { favorites: 'favoriteSeriesIds', watchlist: 'watchlistSeriesIds', watched: 'watchedSeriesIds' },
         }[itemType][listType];
 
         // 1.5. (THE FIX) Fetch the user's current list first
@@ -78,9 +80,9 @@ export async function POST(request) {
           create: createPayload,
         });
 
-        // 4. (THE FIX) Atomically add or remove using a Set to prevent duplicates
+        // 4. Atomically add or remove using a Set to prevent duplicates
         const currentList = user[fieldToUpdate] || [];
-        const idSet = new Set(currentList.map(String)); // Use strings for comparison
+        const idSet = new Set(currentList.map(String));
         const mediaIdString = mediaItem.id.toString();
 
         if (action === 'add') {
@@ -89,16 +91,16 @@ export async function POST(request) {
           idSet.delete(mediaIdString);
         }
         
-        const newList = Array.from(idSet); // Convert Set back to array
+        const newList = Array.from(idSet);
         
         const updatedUser = await prisma.user.update({
           where: { id: userId },
           data: { 
             [fieldToUpdate]: {
-              set: newList // Use 'set' to overwrite with the deduped list
+              set: newList
             }
           },
-          include: { favoriteMovies: true, watchlistMovies: true, favoriteSeries: true, watchlistSeries: true }
+          include: { favoriteMovies: true, watchlistMovies: true, watchedMovies: true, favoriteSeries: true, watchlistSeries: true, watchedSeries: true }
         });
         
         // 5. Return the updated user object to the client

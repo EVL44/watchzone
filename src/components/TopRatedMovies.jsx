@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { FaStar, FaBookmark, FaHeart, FaList } from 'react-icons/fa';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
+import { FaStar, FaBookmark, FaHeart, FaList, FaEye } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -30,6 +31,7 @@ export default function TopRatedMovies() {
           ...movie,
           isFavorite: user?.favoriteMovies?.some(m => m.tmdbId === movie.id) || false,
           isWatchlisted: user?.watchlistMovies?.some(m => m.tmdbId === movie.id) || false,
+          isWatched: user?.watchedMovies?.some(m => m.tmdbId === movie.id) || false,
         }));
         setMovies(moviesWithStatus);
       } catch (error) {
@@ -39,17 +41,19 @@ export default function TopRatedMovies() {
       }
     };
     fetchAllMovies();
-  }, []); // Removed 'user' from the dependency array
+  }, []);
 
   const handleListAction = useCallback(async (movie, listType) => {
     if (!user) return router.push('/login');
 
     const itemType = 'movie';
-    const currentStatus = listType === 'favorites' ? movie.isFavorite : movie.isWatchlisted;
+    const statusMap = { favorites: 'isFavorite', watchlist: 'isWatchlisted', watched: 'isWatched' };
+    const statusKey = statusMap[listType];
+    const currentStatus = movie[statusKey];
     const action = currentStatus ? 'remove' : 'add';
 
     setMovies(prevMovies => prevMovies.map(m => 
-      m.id === movie.id ? { ...m, [listType === 'favorites' ? 'isFavorite' : 'isWatchlisted']: !currentStatus } : m
+      m.id === movie.id ? { ...m, [statusKey]: !currentStatus } : m
     ));
 
     try {
@@ -64,7 +68,7 @@ export default function TopRatedMovies() {
     } catch (error) {
       console.error(error);
       setMovies(prevMovies => prevMovies.map(m => 
-        m.id === movie.id ? { ...m, [listType === 'favorites' ? 'isFavorite' : 'isWatchlisted']: currentStatus } : m
+        m.id === movie.id ? { ...m, [statusKey]: currentStatus } : m
       ));
     }
   }, [user, router, updateUserContext]);
@@ -88,7 +92,7 @@ export default function TopRatedMovies() {
                   layout="fill"
                   objectFit="cover"
                   className="rounded-md"
-                  unoptimized={true}
+                  loader={cloudinaryLoader}
                 />
               </Link>
               <div className="flex-1 ml-4">
@@ -103,6 +107,7 @@ export default function TopRatedMovies() {
               <div className="flex flex-col items-center justify-start gap-3 pl-4">
                   <button onClick={() => handleListAction(movie, 'watchlist')} className={`p-2 rounded-full transition-colors ${movie.isWatchlisted ? 'bg-primary text-white' : 'bg-secondary text-foreground/70 hover:text-primary'}`} title="Add to Watchlist"><FaBookmark /></button>
                   <button onClick={() => handleListAction(movie, 'favorites')} className={`p-2 rounded-full transition-colors ${movie.isFavorite ? 'bg-primary text-white' : 'bg-secondary text-foreground/70 hover:text-primary'}`} title="Add to Favorites"><FaHeart /></button>
+                  <button onClick={() => handleListAction(movie, 'watched')} className={`p-2 rounded-full transition-colors ${movie.isWatched ? 'bg-green-500 text-white' : 'bg-secondary text-foreground/70 hover:text-green-400'}`} title="Mark as Watched"><FaEye /></button>
                   <button onClick={() => { setSelectedItem(movie); setShowAddToList(true); }} className="p-2 rounded-full bg-secondary text-foreground/70 hover:text-primary transition-colors" title="Add to List"><FaList /></button>
               </div>
             </li>

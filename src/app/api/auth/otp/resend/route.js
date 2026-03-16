@@ -1,40 +1,16 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
 import prisma from '@/lib/prisma';
 import { Resend } from 'resend';
 
 export async function POST(request) {
   try {
-    const { username, email, password } = await request.json();
+    const { email } = await request.json();
 
-    if (!username || !email || !password) {
-      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ message: 'Email is required' }, { status: 400 });
     }
 
-    // Server-side password strength validation
-    const isValidPassword = 
-      password.length >= 8 &&
-      /[A-Z]/.test(password) &&
-      /[a-z]/.test(password) &&
-      /[0-9]/.test(password) &&
-      /[^A-Za-z0-9]/.test(password);
-
-    if (!isValidPassword) {
-      return NextResponse.json({ message: 'Password does not meet security requirements.' }, { status: 400 });
-    }
-    
-    // Check if user already exists
-    const existingUser = await prisma.user.findFirst({
-      where: { OR: [{ email: email }, { username: username }] },
-    });
-
-    if (existingUser && !existingUser.isDeactivated) {
-      const field = existingUser.email === email ? 'Email' : 'Username';
-      return NextResponse.json({ message: `${field} is already taken` }, { status: 409 });
-    }
-    // If deactivated, we still proceed to OTP verification to ensure they own the email before reactivating.
-
-    // Rate Limiting (Max 3 per 10 minutes)
+    // 1. Rate Limiting (Max 3 per 10 minutes)
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     const rateLimit = await prisma.otpRateLimit.findUnique({ where: { email } });
 
@@ -48,6 +24,7 @@ export async function POST(request) {
            data: { attempts: { increment: 1 } }
         });
       } else {
+        // Reset window if 10 mins passed
         await prisma.otpRateLimit.update({
            where: { email },
            data: { attempts: 1, windowStartsAt: new Date() }
@@ -59,20 +36,25 @@ export async function POST(request) {
       });
     }
 
-    // Generate 6-digit OTP
+    // 2. Generate new 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Clean up old ones for this email to prevent clutter
+    await prisma.otpToken.deleteMany({
+       where: { email }
+    });
 
     await prisma.otpToken.create({
        data: { email, otp, expiresAt }
     });
 
-    // Send via Resend
+    // 3. Send out via Resend
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { data, error: resendError } = await resend.emails.send({
       from: 'WatchZone <noreply@watchzone.dev>',
       to: email,
-      subject: '🎬 Your WatchZone Verification Code',
+      subject: '🎬 Your New WatchZone Verification Code',
       html: `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0;padding:0;background-color:#0c0a09;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
@@ -85,14 +67,13 @@ export async function POST(request) {
 <tr><td style="background-color:#1c1917;border-radius:12px 12px 0 0;padding:40px 40px 32px;text-align:center;">
 <img src="https://watchzone.dev/wzmax.png" alt="watchzone" width="48" style="display:inline-block;margin-bottom:12px;" />
 <h1 style="margin:0;font-size:20px;font-weight:700;color:#8a2be2;letter-spacing:1px;">watchzone</h1>
-<p style="margin:16px 0 0;font-size:11px;color:#78716c;text-transform:uppercase;letter-spacing:5px;">Email Verification</p>
+<p style="margin:16px 0 0;font-size:11px;color:#78716c;text-transform:uppercase;letter-spacing:5px;">New Verification Code</p>
 </td></tr>
 
 <!-- ====== MAIN CONTENT ====== -->
 <tr><td style="background-color:#0c0a09;padding:36px 40px 40px;">
 
-<p style="margin:0 0 8px;font-size:15px;color:#a8a29e;line-height:1.7;">Hey <strong style="color:#ededed;">${username}</strong>,</p>
-<p style="margin:0 0 32px;font-size:15px;color:#a8a29e;line-height:1.7;">Welcome to <strong style="color:#8a2be2;">watchzone</strong> — your ultimate destination for discovering and tracking movies and TV shows. Enter the code below to activate your account.</p>
+<p style="margin:0 0 32px;font-size:15px;color:#a8a29e;line-height:1.7;">You requested a new verification code. Use it before it expires!</p>
 
 <!-- OTP Code Card -->
 <table width="100%" cellpadding="0" cellspacing="0">
@@ -109,7 +90,7 @@ export async function POST(request) {
 </td></tr>
 </table>
 
-<p style="margin:28px 0 0;font-size:13px;color:#57534e;line-height:1.6;">If you didn't sign up for watchzone, you can safely ignore this email.</p>
+<p style="margin:28px 0 0;font-size:13px;color:#57534e;line-height:1.6;">If you didn't request this, you can safely ignore this email.</p>
 </td></tr>
 
 <!-- ====== FOOTER ====== -->
@@ -157,11 +138,10 @@ export async function POST(request) {
       return NextResponse.json({ message: `Email delivery failed: ${resendError.message}` }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'OTP dispatched successfully. Please verify your email.' }, { status: 200 });
+    return NextResponse.json({ message: 'A new verification code has been dispatched.' }, { status: 200 });
 
   } catch (error) {
-    console.error('Signup Error:', error?.message || error);
-    if (error?.statusCode) console.error('Resend Status:', error.statusCode);
-    return NextResponse.json({ message: error?.message || 'An internal server error occurred.' }, { status: 500 });
+    console.error('OTP Resend Error:', error);
+    return NextResponse.json({ message: 'Internal server error while resending' }, { status: 500 });
   }
 }

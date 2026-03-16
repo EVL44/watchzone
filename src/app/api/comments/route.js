@@ -28,6 +28,7 @@ export async function GET(request) {
       orderBy: {
         createdAt: 'desc', 
       },
+      take: 100, // Limit to 100 comments to prevent massive unrestrained queries
     });
 
     // --- SUPER ADMIN CHECK ---

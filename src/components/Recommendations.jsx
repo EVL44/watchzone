@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaStar } from 'react-icons/fa';
 
 export default function Recommendations({ tmdbId, mediaType }) {
@@ -47,7 +48,7 @@ export default function Recommendations({ tmdbId, mediaType }) {
                   width={160}
                   height={240}
                   className="w-full h-auto"
-                  unoptimized={true} 
+                  loader={cloudinaryLoader} 
                 />
                 <div className="p-3">
                   <h3 className="text-foreground font-bold text-sm truncate group-hover:text-primary transition-colors">{title}</h3>

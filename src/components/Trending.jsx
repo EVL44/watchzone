@@ -3,16 +3,23 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import Link from 'next/link';
 import { FaStar } from 'react-icons/fa';
 import PosterGridSkeleton from './PosterGridSkeleton'; // 1. Import skeleton
 
-export default function Trending() {
-  const [trending, setTrending] = useState([]);
+export default function Trending({ initialData = [] }) {
+  const [trending, setTrending] = useState(initialData);
   const [timeWindow, setTimeWindow] = useState('day');
-  const [loading, setLoading] = useState(true);
+  // Only show loading initially if we didn't receive initialData
+  const [loading, setLoading] = useState(initialData.length === 0);
 
   useEffect(() => {
+    // Skip fetch if this is the initial load with the default 'day' setting and we have initial data
+    if (timeWindow === 'day' && initialData.length > 0 && trending === initialData) {
+      return;
+    }
+
     const fetchTrending = async () => {
       setLoading(true);
       try {
@@ -29,7 +36,7 @@ export default function Trending() {
     };
 
     fetchTrending();
-  }, [timeWindow]);
+  }, [timeWindow, initialData, trending]);
 
   const handleTimeWindowChange = (newTimeWindow) => {
     setTimeWindow(newTimeWindow);
@@ -59,7 +66,7 @@ export default function Trending() {
       {loading ? (
         <PosterGridSkeleton count={10} />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 min-[400px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
           {trending.map((item) => {
             const isMovie = item.media_type === 'movie';
             const title = isMovie ? item.title : item.name;
@@ -74,7 +81,7 @@ export default function Trending() {
                       width={500}
                       height={750}
                       className="w-full h-auto"
-                      unoptimized={true} 
+                      loader={cloudinaryLoader} 
                   />
                   <div className="p-4">
                     <h3 className="text-foreground font-bold text-lg truncate group-hover:text-primary transition-colors">{title}</h3>

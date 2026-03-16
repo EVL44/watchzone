@@ -11,12 +11,13 @@ export async function GET() {
     headers: {
       accept: 'application/json',
       Authorization: `Bearer ${token}`
-    }
+    },
+    next: { revalidate: 86400 } // Cache for 24 hours
   };
 
   try {
-    // Create an array of page numbers to fetch (15 pages * 20 results/page = 300)
-    const pagesToFetch = Array.from({ length: 15 }, (_, i) => i + 1);
+    // Fetch 5 pages (100 top-rated movies)
+    const pagesToFetch = Array.from({ length: 5 }, (_, i) => i + 1);
 
     const fetchPromises = pagesToFetch.map(page =>
       fetch(`https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=${page}`, options)
@@ -26,7 +27,8 @@ export async function GET() {
         })
     );
 
-    const pagesData = await Promise.all(fetchPromises);
+    const results = await Promise.allSettled(fetchPromises);
+    const pagesData = results.filter(r => r.status === 'fulfilled').map(r => r.value);
 
     const allMovies = [];
     const movieIds = new Set();

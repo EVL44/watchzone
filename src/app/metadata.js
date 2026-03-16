@@ -14,11 +14,18 @@ export const metadata = {
     // The template for all other pages (e.g., "Movie Name | watchzone")
     template: '%s - Watchzone',
   },
-  description: "watchzone is your ultimate destination for discovering, tracking, and watching your favorite movies and TV series. Create watchlists, follow users, and join the conversation.",
+  description: "Watch full movies and TV series on watchzone. Your ultimate destination for discovering, tracking, and watching your favorite high-quality cinema. Create watchlists, follow users, and join the conversation.",
   
   // Keywords to help search engines understand your site's content
   keywords: [
     'watchzone',
+    'watch zone',
+    'watch movies free',
+    'watch tv series',
+    'watch movies online',
+    'watchzone movies',
+    'watch zone movies',
+    'free movies',
     'movies',
     'series',
     'tv shows',

@@ -18,8 +18,10 @@ export async function GET(request, { params }) {
       include: {
         favoriteMovies: true,
         watchlistMovies: true,
+        watchedMovies: true,
         favoriteSeries: true,
         watchlistSeries: true,
+        watchedSeries: true,
         playlists: {
           select: { 
             id: true, 

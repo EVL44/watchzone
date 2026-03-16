@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaUserCircle } from 'react-icons/fa';
 
 export default function CastCard({ actor }) {
@@ -15,7 +16,7 @@ export default function CastCard({ actor }) {
                     alt={actor.name}
                     layout="fill"
                     objectFit="cover"
-                    unoptimized={true} 
+                    unoptimized={true}
                 />
             ) : (
                 <div className="w-full h-full bg-surface flex items-center justify-center">

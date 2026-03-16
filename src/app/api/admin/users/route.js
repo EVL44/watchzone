@@ -35,6 +35,7 @@ export async function GET(request) {
         avatarUrl: true,
         roles: true,
         createdAt: true, // Optional: for sorting
+        isDeactivated: true,
       },
       orderBy: {
         createdAt: 'desc',

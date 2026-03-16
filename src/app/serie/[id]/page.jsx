@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaStar, FaTv, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
 import { getServerSession } from 'next-auth/next';
@@ -57,17 +58,17 @@ export async function generateMetadata({ params }) {
 
   // SEO-optimized description
   const description = serie.overview 
-    ? `Discover details, seasons, cast, trailers, and reviews for ${serie.name} (${airYear}). Track, rate, and add ${serie.name} to your watchlist on watchzone.`
-    : `Details for ${serie.name} (${airYear}) on watchzone.`;
+    ? `Watch ${serie.name} (${airYear}) full episodes online on watchzone. Discover details, seasons, cast, trailers, and reviews. Track, rate, and add ${serie.name} to your watchlist.`
+    : `Watch ${serie.name} (${airYear}) on watchzone.`;
 
   return {
-    // The template from layout.jsx will automatically add "| watchzone"
-    title: `${serie.name || 'Series'} (${airYear})`,
+    // The template from layout.jsx will automatically add " - Watchzone"
+    title: `Watch ${serie.name || 'Series'} (${airYear})`,
     description: description,
     
     // Open Graph data for rich social sharing
     openGraph: {
-      title: `${serie.name || 'Series'} (${airYear}) | watchzone`,
+      title: `Watch ${serie.name || 'Series'} (${airYear}) | watchzone`,
       description: description,
       images: [
         {
@@ -87,7 +88,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${serie.name || 'Series'} (${airYear}) | watchzone`,
+      title: `Watch ${serie.name || 'Series'} (${airYear}) | watchzone`,
       description: description,
       images: [`https://image.tmdb.org/t/p/w780${serie.backdrop_path || serie.poster_path}`],
     },
@@ -96,7 +97,10 @@ export async function generateMetadata({ params }) {
 
 async function getSerieDetails(id, userId) {
   const token = process.env.TMDB_API_TOKEN;
-  const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
+  const options = { 
+    headers: { accept: 'application/json', Authorization: `Bearer ${token}` },
+    next: { revalidate: 3600 } 
+  };
   
   const [detailsRes, creditsRes, videosRes] = await Promise.all([
     fetch(`https://api.themoviedb.org/3/tv/${id}?language=en-US`, options),
@@ -111,16 +115,48 @@ async function getSerieDetails(id, userId) {
   const videosData = await videosRes.json();
   serie.trailer = videosData.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube') || videosData.results?.[0];
 
-  if (userId) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { favoriteSeries: { select: { tmdbId: true } }, watchlistSeries: { select: { tmdbId: true } } }
+  // Fetch community ratings from our DB
+  let ratings = [];
+  try {
+    ratings = await prisma.rating.findMany({
+      where: { tmdbId: serie.id, mediaType: 'series' },
     });
-    serie.isFavorite = user?.favoriteSeries.some(s => s.tmdbId === serie.id) || false;
-    serie.isWatchlisted = user?.watchlistSeries.some(s => s.tmdbId === serie.id) || false;
+  } catch (err) {
+    console.error('Rating fetch error:', err.message);
+  }
+  const totalRatings = ratings.length;
+  const averageScore = totalRatings > 0
+    ? Math.round((ratings.reduce((sum, r) => sum + r.score, 0) / totalRatings) * 10) / 10
+    : 0;
+
+  serie.ratingData = { averageScore, totalRatings, userRating: null };
+
+  if (userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { 
+          favoriteSeries: { select: { tmdbId: true } }, 
+          watchlistSeries: { select: { tmdbId: true } },
+          watchedSeries: { select: { tmdbId: true } },
+        }
+      });
+      serie.isFavorite = user?.favoriteSeries.some(s => s.tmdbId === serie.id) || false;
+      serie.isWatchlisted = user?.watchlistSeries.some(s => s.tmdbId === serie.id) || false;
+      serie.isWatched = user?.watchedSeries.some(s => s.tmdbId === serie.id) || false;
+
+      const userRating = ratings.find(r => r.userId === userId);
+      if (userRating) serie.ratingData.userRating = userRating;
+    } catch (err) {
+      console.error('User data fetch error:', err.message);
+      serie.isFavorite = false;
+      serie.isWatchlisted = false;
+      serie.isWatched = false;
+    }
   } else {
     serie.isFavorite = false;
     serie.isWatchlisted = false;
+    serie.isWatched = false;
   }
 
   return serie;
@@ -187,17 +223,19 @@ export default async function SerieDetailsPage({ params }) {
               <div className="flex items-center gap-2"><FaTv /><span>{serie.number_of_episodes} Episodes</span></div>
             </div>
             
-            <div className="flex flex-col md:flex-row md:items-center">
+            <div className="flex flex-wrap items-start gap-4 mt-6">
                 <MediaActionButtons 
                   item={serie} 
                   itemType="series"
                   initialFavorite={serie.isFavorite}
                   initialWatchlisted={serie.isWatchlisted}
+                  initialWatched={serie.isWatched}
                   trailer={serie.trailer}
+                  ratingData={serie.ratingData}
                 />
                 <Link 
                   href={`/watch/tv/${params.id}`} 
-                  className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mt-4 md:mt-6 md:ml-4 w-full md:w-auto"
+                  className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 md:py-2 md:px-4 rounded-lg transition-colors w-full sm:w-auto"
                 >
                   <FaPlay />
                   <span>Watch Now</span>

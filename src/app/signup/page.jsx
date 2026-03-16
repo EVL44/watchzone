@@ -13,12 +13,41 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 2. Add state
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Password validation state
+  const [passwordChecks, setPasswordChecks] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false
+  });
+
   const router = useRouter();
+
+  const validatePassword = (pass) => {
+    setPasswordChecks({
+      length: pass.length >= 8,
+      uppercase: /[A-Z]/.test(pass),
+      lowercase: /[a-z]/.test(pass),
+      number: /[0-9]/.test(pass),
+      special: /[^A-Za-z0-9]/.test(pass) // Any character that is not a letter or number
+    });
+    setPassword(pass);
+  };
+
+  const isPasswordValid = Object.values(passwordChecks).every(Boolean);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (!isPasswordValid) {
+        setError('Please ensure your password meets all security requirements.');
+        return;
+    }
+    
     setLoading(true);
 
     try {
@@ -33,18 +62,10 @@ export default function SignupPage() {
       if (!res.ok) {
         throw new Error(data.message || 'Something went wrong');
       }
+      // Securely pass temporary data to verify-otp page
+      sessionStorage.setItem('pendingRegistration', JSON.stringify({ email, username, password }));
       
-      const signInResult = await signIn('credentials', {
-        email,
-        password,
-        redirect: false, 
-      });
-
-      if (signInResult.error) {
-        throw new Error(signInResult.error);
-      }
-      
-      router.push('/');
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
 
     } catch (err) {
       setError(err.message);
@@ -88,7 +109,7 @@ export default function SignupPage() {
               type={showPassword ? 'text' : 'password'}
               id="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => validatePassword(e.target.value)}
               className="w-full px-4 py-2 text-foreground bg-secondary border border-stone-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" 
               placeholder="Password"
               required
@@ -102,6 +123,27 @@ export default function SignupPage() {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
+
+          {/* Password Strength Checklist */}
+          {password && (
+             <div className="space-y-1 mt-2 text-xs">
+                 <p className={passwordChecks.length ? "text-green-500" : "text-gray-500"}>
+                     {passwordChecks.length ? '✓' : '○'} At least 8 characters
+                 </p>
+                 <p className={passwordChecks.uppercase ? "text-green-500" : "text-gray-500"}>
+                     {passwordChecks.uppercase ? '✓' : '○'} At least 1 uppercase letter
+                 </p>
+                 <p className={passwordChecks.lowercase ? "text-green-500" : "text-gray-500"}>
+                     {passwordChecks.lowercase ? '✓' : '○'} At least 1 lowercase letter
+                 </p>
+                 <p className={passwordChecks.number ? "text-green-500" : "text-gray-500"}>
+                     {passwordChecks.number ? '✓' : '○'} At least 1 number
+                 </p>
+                 <p className={passwordChecks.special ? "text-green-500" : "text-gray-500"}>
+                     {passwordChecks.special ? '✓' : '○'} At least 1 special character
+                 </p>
+             </div>
+          )}
           
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <button

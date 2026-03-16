@@ -7,11 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import UploadWidget from '@/components/UploadWidget';
-// --- THIS IS THE FIX ---
-import { FaUserCircle, FaEdit, FaHeart, FaListAlt, FaTrash, FaKey, FaUserTag, FaGoogle } from 'react-icons/fa';
-// --- END OF FIX ---
+import { FaUserCircle, FaEdit, FaHeart, FaListAlt, FaTrash, FaKey, FaUserTag, FaGoogle, FaEye, FaSave } from 'react-icons/fa';
 import MediaGrid from '@/components/MediaGrid';
 import Link from 'next/link';
+import DeleteAccountModal from '@/components/DeleteAccountModal';
 
 export default function ProfilePage() {
   const { user, loading, deleteAccount } = useAuth();
@@ -22,22 +21,59 @@ export default function ProfilePage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
+
+  // Bio editing
+  const [bio, setBio] = useState('');
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [isSavingBio, setIsSavingBio] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push('/login');
+    if (user) setBio(user.bio || '');
   }, [user, loading, router]);
 
   const handleDeleteAccount = async () => {
     setIsUpdating(true);
     try {
       await deleteAccount();
-      // The AuthContext now handles the redirect
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Failed to delete account.' });
       setShowDeleteConfirmation(false);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleSaveBio = async () => {
+    setIsSavingBio(true);
+    try {
+      const res = await fetch('/api/user/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bio }),
+      });
+      if (!res.ok) throw new Error('Failed to update bio');
+      setIsEditingBio(false);
+      setMessage({ type: 'success', text: 'Bio updated!' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    } finally {
+      setIsSavingBio(false);
+    }
+  };
+
+  const handleBannerUpload = async (url) => {
+    try {
+      const res = await fetch('/api/user/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bannerUrl: url }),
+      });
+      if (!res.ok) throw new Error('Failed to update banner');
+      router.refresh();
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
     }
   };
   
@@ -47,6 +83,7 @@ export default function ProfilePage() {
 
   const combinedFavorites = [...(user.favoriteMovies || []), ...(user.favoriteSeries || [])];
   const combinedWatchlist = [...(user.watchlistMovies || []), ...(user.watchlistSeries || [])];
+  const combinedWatched = [...(user.watchedMovies || []), ...(user.watchedSeries || [])];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -71,23 +108,49 @@ export default function ProfilePage() {
         <div>
           <h1 className="text-3xl font-bold">{user.username || user.name}</h1>
           <p className="text-foreground text-opacity-70">{user.email}</p>
+          {/* Bio display/edit */}
+          <div className="mt-2">
+            {isEditingBio ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Write a short bio..."
+                  className="bg-secondary text-foreground px-3 py-1.5 rounded-md text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-primary"
+                  maxLength={160}
+                />
+                <button onClick={handleSaveBio} disabled={isSavingBio} className="text-primary hover:text-primary/80 p-1.5">
+                  <FaSave />
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setIsEditingBio(true)} className="text-foreground/50 text-sm hover:text-foreground transition-colors">
+                {user.bio || 'Add a bio...'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
       
+      {message.text && (
+        <div className={`mb-4 p-3 rounded-lg text-sm ${message.type === 'error' ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+          {message.text}
+        </div>
+      )}
+
       <div className="md:flex gap-8">
         <aside className="md:w-1/4 flex-shrink-0">
           <nav className="bg-surface p-4 rounded-lg">
             <ul className="space-y-2">
               <li><button onClick={() => setActiveTab('favorites')} className={`w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 ${activeTab === 'favorites' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}><FaHeart /> Favorites</button></li>
               <li><button onClick={() => setActiveTab('watchlist')} className={`w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 ${activeTab === 'watchlist' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}><FaListAlt /> Watchlist</button></li>
+              <li><button onClick={() => setActiveTab('watched')} className={`w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 ${activeTab === 'watched' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}><FaEye /> Watched</button></li>
               <li><button onClick={() => setActiveTab('settings')} className={`w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 ${activeTab === 'settings' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}><FaEdit /> Settings</button></li>
             </ul>
             <div className="mt-6 pt-4 border-t border-secondary">
               <button 
-                onClick={() => {
-                  setDeleteConfirmationInput('');
-                  setShowDeleteConfirmation(true);
-                }}
+                onClick={() => setShowDeleteConfirmation(true)}
                 className="w-full text-left p-3 rounded-md transition-colors flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium"
               >
                 <FaTrash /> Delete Account
@@ -142,45 +205,19 @@ export default function ProfilePage() {
             
             {activeTab === 'favorites' && <MediaGrid items={combinedFavorites} title="My Favorites" />}
             {activeTab === 'watchlist' && <MediaGrid items={combinedWatchlist} title="My Watchlist" />}
+            {activeTab === 'watched' && <MediaGrid items={combinedWatched} title="My Watched" />}
           </div>
         </main>
       </div>
 
       {showDeleteConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
-          <div className="bg-surface rounded-lg w-full max-w-sm p-6 relative shadow-2xl">
-            <h2 className="text-xl font-bold text-red-500 mb-4">Confirm Account Deletion</h2>
-            <p className="text-foreground/80 mb-6">
-              This action is permanent. To confirm, please type your username: <strong className="text-foreground">{userIdentifier}</strong>
-            </p>
-            
-            <input
-              type="text"
-              value={deleteConfirmationInput}
-              onChange={(e) => setDeleteConfirmationInput(e.target.value)}
-              className="w-full bg-secondary p-3 rounded-md focus:ring-2 focus:ring-primary focus:outline-none mb-4"
-              placeholder={`Type "${userIdentifier}" to confirm`}
-            />
-
-            <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => setShowDeleteConfirmation(false)} 
-                disabled={isUpdating} 
-                className="bg-secondary text-foreground px-4 py-2 rounded-md hover:bg-secondary/70 transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleDeleteAccount} 
-                disabled={isUpdating || deleteConfirmationInput !== userIdentifier} 
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors"
-              >
-                {isUpdating ? 'Deleting...' : 'Yes, Delete My Account'}
-              </button>
-            </div>
-            {message.text && message.type === 'error' && <p className={`mt-4 text-sm text-red-500`}>{message.text}</p>}
-          </div>
-        </div>
+        <DeleteAccountModal
+          userIdentifier={userIdentifier}
+          onClose={() => setShowDeleteConfirmation(false)}
+          onConfirm={handleDeleteAccount}
+          isUpdating={isUpdating}
+          message={message}
+        />
       )}
     </div>
   );

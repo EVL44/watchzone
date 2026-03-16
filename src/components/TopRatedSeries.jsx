@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { FaStar, FaBookmark, FaHeart, FaList } from 'react-icons/fa';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
+import { FaStar, FaBookmark, FaHeart, FaList, FaEye } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -30,6 +31,7 @@ export default function TopRatedSeries() {
           ...s,
           isFavorite: user?.favoriteSeries?.some(m => m.tmdbId === s.id) || false,
           isWatchlisted: user?.watchlistSeries?.some(m => m.tmdbId === s.id) || false,
+          isWatched: user?.watchedSeries?.some(m => m.tmdbId === s.id) || false,
         }));
         setSeries(seriesWithStatus);
       } catch (error) {
@@ -39,17 +41,19 @@ export default function TopRatedSeries() {
       }
     };
     fetchAllSeries();
-  }, []); // Removed 'user' from the dependency array
+  }, []);
 
   const handleListAction = useCallback(async (serie, listType) => {
     if (!user) return router.push('/login');
 
     const itemType = 'series';
-    const currentStatus = listType === 'favorites' ? serie.isFavorite : serie.isWatchlisted;
+    const statusMap = { favorites: 'isFavorite', watchlist: 'isWatchlisted', watched: 'isWatched' };
+    const statusKey = statusMap[listType];
+    const currentStatus = serie[statusKey];
     const action = currentStatus ? 'remove' : 'add';
 
     setSeries(prevSeries => prevSeries.map(s => 
-      s.id === serie.id ? { ...s, [listType === 'favorites' ? 'isFavorite' : 'isWatchlisted']: !currentStatus } : s
+      s.id === serie.id ? { ...s, [statusKey]: !currentStatus } : s
     ));
 
     try {
@@ -64,7 +68,7 @@ export default function TopRatedSeries() {
     } catch (error) {
       console.error(error);
       setSeries(prevSeries => prevSeries.map(s => 
-        s.id === serie.id ? { ...s, [listType === 'favorites' ? 'isFavorite' : 'isWatchlisted']: currentStatus } : s
+        s.id === serie.id ? { ...s, [statusKey]: currentStatus } : s
       ));
     }
   }, [user, router, updateUserContext]);
@@ -88,7 +92,7 @@ export default function TopRatedSeries() {
                   layout="fill"
                   objectFit="cover"
                   className="rounded-md"
-                  unoptimized={true}
+                  loader={cloudinaryLoader}
                 />
               </Link>
               <div className="flex-1 ml-4">
@@ -103,6 +107,7 @@ export default function TopRatedSeries() {
               <div className="flex flex-col items-center justify-start gap-3 pl-4">
                   <button onClick={() => handleListAction(item, 'watchlist')} className={`p-2 rounded-full transition-colors ${item.isWatchlisted ? 'bg-primary text-white' : 'bg-secondary text-foreground/70 hover:text-primary'}`} title="Add to Watchlist"><FaBookmark /></button>
                   <button onClick={() => handleListAction(item, 'favorites')} className={`p-2 rounded-full transition-colors ${item.isFavorite ? 'bg-primary text-white' : 'bg-secondary text-foreground/70 hover:text-primary'}`} title="Add to Favorites"><FaHeart /></button>
+                  <button onClick={() => handleListAction(item, 'watched')} className={`p-2 rounded-full transition-colors ${item.isWatched ? 'bg-green-500 text-white' : 'bg-secondary text-foreground/70 hover:text-green-400'}`} title="Mark as Watched"><FaEye /></button>
                   <button onClick={() => { setSelectedItem(item); setShowAddToList(true); }} className="p-2 rounded-full bg-secondary text-foreground/70 hover:text-primary transition-colors" title="Add to List"><FaList /></button>
               </div>
             </li>

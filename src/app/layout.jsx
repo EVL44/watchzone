@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <Nav />
           {/* Add padding-bottom on mobile (md:pb-0) to prevent bottom nav from covering content */}
-          <main className="pb-20 md:pb-0">
+          <main className="pb-16 md:pb-0">
             {children}
           </main>
           <Footer />

@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaSearch, FaUserCircle, FaFilm, FaTv } from 'react-icons/fa';
 
 export default function HeroSearch() {
@@ -97,13 +98,13 @@ export default function HeroSearch() {
                 <div className="flex-shrink-0 w-10 h-10 rounded-md bg-secondary flex items-center justify-center overflow-hidden">
                   {item.media_type === 'user' ? (
                     item.avatarUrl ? (
-                      <Image src={item.avatarUrl} alt={item.name} width={40} height={40} className="w-full h-full object-cover" unoptimized={true} />
+                      <Image src={item.avatarUrl} alt={item.name} width={40} height={40} className="w-full h-full object-cover" loader={cloudinaryLoader} />
                     ) : (
                       <FaUserCircle className="w-6 h-6 text-gray-400" />
                     )
                   ) : (
                     item.poster_path ? (
-                      <Image src={`https://image.tmdb.org/t/p/w92${item.poster_path}`} alt={item.name} width={40} height={60} className="w-full h-full object-cover" unoptimized={true} />
+                      <Image src={`https://image.tmdb.org/t/p/w92${item.poster_path}`} alt={item.name} width={40} height={60} className="w-full h-full object-cover" loader={cloudinaryLoader} />
                     ) : (
                       item.media_type === 'movie' ? <FaFilm className="w-6 h-6 text-gray-400" /> : <FaTv className="w-6 h-6 text-gray-400" />
                     )
