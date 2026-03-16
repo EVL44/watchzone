@@ -101,8 +101,8 @@ export const AuthProvider = ({ children }) => {
     loading: loading || (status === 'authenticated' && !user), 
     login,
     logout,
-    deleteAccount,
     updateUserContext,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [user, loading, status]);
 
   return (
