@@ -5,6 +5,7 @@ import Adsense from "@/components/Adsense";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import HeroSearch from "@/components/HeroSearch";
+import PersonalizedSection from "@/components/PersonalizedSection";
 import { headers } from 'next/headers';
 
 // Helper function to fetch trending items directly from TMDB
@@ -78,6 +79,8 @@ export default async function Home() {
 
       {/* (Rest of your page content) */}
       <div className="container mx-auto px-4 py-8">
+        <PersonalizedSection user={user} />
+        
         <div className="mb-16">
           <Trending initialData={initialTrending} />
         </div>

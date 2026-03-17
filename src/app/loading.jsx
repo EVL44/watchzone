@@ -24,7 +24,7 @@ export default function HomeLoading() {
         <div className="h-24 bg-surface rounded-lg w-full max-w-4xl mx-auto my-8 animate-pulse"></div>
 
         {/* Skeleton for Trending */}
-        <div className="mb-16">
+        <div className="mb-16 xl:mx-40">
           <div className="h-10 bg-surface rounded-lg w-1/3 mb-6 animate-pulse"></div>
           <PosterGridSkeleton count={5} />
         </div>
@@ -33,7 +33,7 @@ export default function HomeLoading() {
         <div className="h-24 bg-surface rounded-lg w-full max-w-4xl mx-auto my-8 animate-pulse"></div>
 
         {/* Skeleton for Popular Movies */}
-        <div className="mb-16">
+        <div className="mb-16 xl:mx-40">
           <div className="h-10 bg-surface rounded-lg w-1/4 mb-6 animate-pulse"></div>
           <PosterGridSkeleton count={5} />
         </div>
@@ -42,7 +42,7 @@ export default function HomeLoading() {
         <div className="h-24 bg-surface rounded-lg w-full max-w-4xl mx-auto my-8 animate-pulse"></div>
         
         {/* Skeleton for Popular Series */}
-        <div>
+        <div className="xl:mx-40">
           <div className="h-10 bg-surface rounded-lg w-1/4 mb-6 animate-pulse"></div>
           <PosterGridSkeleton count={5} />
         </div>

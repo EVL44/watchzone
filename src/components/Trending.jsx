@@ -1,7 +1,7 @@
 // src/components/Trending.jsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import Link from 'next/link';
@@ -13,11 +13,14 @@ export default function Trending({ initialData = [] }) {
   const [timeWindow, setTimeWindow] = useState('day');
   // Only show loading initially if we didn't receive initialData
   const [loading, setLoading] = useState(initialData.length === 0);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    // Skip fetch if this is the initial load with the default 'day' setting and we have initial data
-    if (timeWindow === 'day' && initialData.length > 0 && trending === initialData) {
-      return;
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (timeWindow === 'day' && initialData.length > 0) {
+        return;
+      }
     }
 
     const fetchTrending = async () => {
@@ -36,7 +39,7 @@ export default function Trending({ initialData = [] }) {
     };
 
     fetchTrending();
-  }, [timeWindow, initialData, trending]);
+  }, [timeWindow, initialData]);
 
   const handleTimeWindowChange = (newTimeWindow) => {
     setTimeWindow(newTimeWindow);

@@ -9,6 +9,7 @@ import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
 import Link from 'next/link';
 import Recommendations from '@/components/Recommendations'; 
+import AIRecommendations from '@/components/AIRecommendations';
 import CommentSection from '@/components/CommentSection'; 
 import { notFound } from 'next/navigation';
 
@@ -269,6 +270,7 @@ export default async function SerieDetailsPage({ params }) {
         
         {/* 7. New Sections (Kept) */}
         <div className='xl:mx-40'>
+          <AIRecommendations tmdbId={serie.id} type="tv" title={serie.name} overview={serie.overview} />
           <Recommendations tmdbId={serie.id} mediaType="series" />
           <CommentSection tmdbId={serie.id} mediaType="series" />
         </div>

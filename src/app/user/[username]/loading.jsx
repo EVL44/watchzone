@@ -1,5 +1,5 @@
-import ProfileSkeleton from "@/components/ProfileSkeleton";
+import UserProfileSkeleton from "@/components/UserProfileSkeleton";
 
 export default function UserProfileLoading() {
-    return <ProfileSkeleton />;
+    return <UserProfileSkeleton />;
 }

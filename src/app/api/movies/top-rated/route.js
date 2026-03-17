@@ -16,8 +16,8 @@ export async function GET() {
   };
 
   try {
-    // Fetch 5 pages (100 top-rated movies)
-    const pagesToFetch = Array.from({ length: 5 }, (_, i) => i + 1);
+    // Fetch 15 pages (300 top-rated movies)
+    const pagesToFetch = Array.from({ length: 15 }, (_, i) => i + 1);
 
     const fetchPromises = pagesToFetch.map(page =>
       fetch(`https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=${page}`, options)

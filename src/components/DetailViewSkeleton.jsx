@@ -13,7 +13,7 @@ const DetailViewSkeleton = () => {
           
           {/* 4. Skeleton for Poster (matching md:w-1/4) */}
           <div className="md:w-1/4 flex-shrink-0">
-            <div className="relative w-full aspect-[2/3] rounded-lg bg-surface"></div>
+            <div className="relative w-full aspect-[2/3] rounded-lg shadow-2xl bg-surface"></div>
           </div>
           
           {/* 5. Skeleton for Details (matching md:w-2/3) */}
@@ -31,17 +31,17 @@ const DetailViewSkeleton = () => {
             </div>
             
             {/* Buttons */}
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-start gap-4 mt-6">
+              <div className="flex items-center gap-2">
                 <div className="w-12 h-12 bg-surface rounded-full"></div>
                 <div className="w-12 h-12 bg-surface rounded-full"></div>
                 <div className="w-12 h-12 bg-surface rounded-full"></div>
               </div>
-              <div className="w-full md:w-40 h-12 bg-surface rounded-lg"></div>
+              <div className="w-full sm:w-auto md:w-40 h-10 md:h-12 bg-surface rounded-lg"></div>
             </div>
 
             {/* Genres */}
-            <div className="h-8 bg-surface rounded w-1/4 mt-8 mb-2"></div>
+            <div className="h-8 bg-surface rounded w-1/4 mt-6 mb-2"></div>
             <div className="flex flex-wrap gap-2">
               <div className="h-7 bg-surface rounded-full w-20"></div>
               <div className="h-7 bg-surface rounded-full w-24"></div>
@@ -49,7 +49,7 @@ const DetailViewSkeleton = () => {
             </div>
 
             {/* Overview */}
-            <div className="h-8 bg-surface rounded w-1/4 mt-8 mb-2"></div>
+            <div className="h-8 bg-surface rounded w-1/4 mt-6 mb-2"></div>
             <div className="space-y-3">
               <div className="h-4 bg-surface rounded w-full"></div>
               <div className="h-4 bg-surface rounded w-full"></div>
@@ -67,7 +67,7 @@ const DetailViewSkeleton = () => {
           <div className="h-9 bg-surface rounded w-1/3 mb-4"></div>
           <div className="flex overflow-x-auto gap-5 pb-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-secondary rounded-lg w-40 flex-shrink-0">
+              <div key={i} className="bg-secondary rounded-lg w-32 sm:w-40 flex-shrink-0">
                 <div className="w-full h-48 bg-surface rounded-t-lg"></div>
                 <div className="p-2">
                   <div className="h-5 bg-surface rounded w-3/4 mb-1"></div>

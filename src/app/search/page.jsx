@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { FaSearch } from 'react-icons/fa';
 import SearchResults from '@/components/SearchResults';
+import SmartSearch from '@/components/SmartSearch';
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -23,6 +24,9 @@ function SearchPageContent() {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      {/* 1. AI Smart Search Component */}
+      <SmartSearch />
+      
       {/* Mobile search bar */}
       <div className="md:hidden relative mb-6">
         <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-foreground/50">

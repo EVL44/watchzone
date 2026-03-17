@@ -9,6 +9,7 @@ import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
 import Link from 'next/link';
 import Recommendations from '@/components/Recommendations'; 
+import AIRecommendations from '@/components/AIRecommendations';
 import CommentSection from '@/components/CommentSection'; 
 import { notFound } from 'next/navigation';
 
@@ -265,6 +266,7 @@ export default async function MoviePage({ params }) {
         
         {/* 7. New Sections (Kept) */}
         <div className='xl:mx-40'>
+          <AIRecommendations tmdbId={movie.id} type="movie" title={movie.title} overview={movie.overview} />
           <Recommendations tmdbId={movie.id} mediaType="movies" />
           <CommentSection tmdbId={movie.id} mediaType="movies" />
         </div>
