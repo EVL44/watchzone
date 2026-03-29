@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/wzmax.png"></link>
         {/* manifest.json is also automatically added by Next.js if present in /public */}
       </head>
-      <body className={jetBrains_mono.variable}>
+      <body className={jetBrains_mono.variable} suppressHydrationWarning>
         
         <Script 
           async 

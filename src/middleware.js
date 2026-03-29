@@ -4,7 +4,11 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  let token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, secureCookie: true });
+  if (!token) {
+    token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, secureCookie: false });
+  }
+  
   const { pathname } = req.nextUrl;
 
   const completeProfileUrl = new URL('/profile/complete', req.url);

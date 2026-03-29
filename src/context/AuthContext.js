@@ -34,8 +34,9 @@ export const AuthProvider = ({ children }) => {
             const fullUserData = await res.json();
             setUser(fullUserData);
          } catch (e) {
-            console.error("Failed to fetch full user", e);
-            signOut(); 
+            console.error("Failed to fetch full user:", e);
+            // Fallback to basic session user instead of aggressively logging them out
+            setUser(session.user);
          }
       };
       
