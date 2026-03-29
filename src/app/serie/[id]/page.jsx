@@ -43,7 +43,7 @@ const createJsonLd = (serie, creator) => {
 };
 
 export async function generateMetadata({ params }) {
-  const { id } = params;
+  const { id }  = await params;
   const token = process.env.TMDB_API_TOKEN;
 
   const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
@@ -166,7 +166,7 @@ export default async function SerieDetailsPage({ params }) {
   const session = await getAuthSession();
   let userId = session?.user?.id || null;
 
-  const serie = await getSerieDetails(params.id, userId);
+  const serie = await getSerieDetails((await params).id, userId);
 
   if (!serie) {
     notFound();
@@ -234,7 +234,7 @@ export default async function SerieDetailsPage({ params }) {
                   ratingData={serie.ratingData}
                 />
                 <Link 
-                  href={`/watch/tv/${params.id}`} 
+                  href={`/watch/tv/${(await params).id}`} 
                   className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 md:py-2 md:px-4 rounded-lg transition-colors w-full sm:w-auto"
                 >
                   <FaPlay />

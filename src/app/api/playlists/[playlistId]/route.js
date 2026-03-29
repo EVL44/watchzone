@@ -6,7 +6,7 @@ import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
-  const { playlistId } = params;
+  const { playlistId }  = await params;
 
   try {
     const playlist = await prisma.playlist.findUnique({

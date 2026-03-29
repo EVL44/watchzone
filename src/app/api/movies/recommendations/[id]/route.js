@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
-  const { id } = params;
+  const { id }  = await params;
   const token = process.env.TMDB_API_TOKEN;
   
   if (!token) {

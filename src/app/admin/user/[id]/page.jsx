@@ -73,7 +73,7 @@ export default function AdvancedUserPage() {
   const { user: currentUser, loading } = useAuth();
   const router = useRouter();
   const params = useParams();
-  const userId = params.id;
+  const userId  = params.id;
 
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

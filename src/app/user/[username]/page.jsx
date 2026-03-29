@@ -62,7 +62,7 @@ async function getUserProfile(username, currentUserId) {
 }
 
 export default async function UserProfilePage({ params }) {
-  const { username } = params;
+  const { username }  = await params;
 
   const session = await getAuthSession();
   const currentUserId = session?.user?.id || null;

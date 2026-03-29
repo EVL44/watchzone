@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 // DELETE a comment
 export async function DELETE(request, { params }) {
-  const commentId = params.id;
+  const commentId  = (await params).id;
   try {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {

@@ -1,5 +1,5 @@
-export default function WatchPage({ params }) {
-  const { type, id } = params;
+export default async function WatchPage({ params }) {
+  const { type, id }  = await params;
   const embedUrl = `https://vidsrc.to/embed/${type}/${id}`;
   const title = type === 'movie' ? 'Movie' : 'Series';
 

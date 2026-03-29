@@ -42,7 +42,7 @@ const createJsonLd = (movie, director) => {
 
 
 export async function generateMetadata({ params }) {
-  const { id } = params;
+  const { id }  = await params;
   const token = process.env.TMDB_API_TOKEN;
 
   const options = { headers: { accept: 'application/json', Authorization: `Bearer ${token}` } };
@@ -168,7 +168,7 @@ export default async function MoviePage({ params }) {
   const session = await getAuthSession();
   let userId = session?.user?.id || null;
 
-  const movie = await getMovieDetails(params.id, userId);
+  const movie = await getMovieDetails((await params).id, userId);
 
   if (!movie) {
     notFound(); // Triggers the 404 page
@@ -238,7 +238,7 @@ export default async function MoviePage({ params }) {
                 ratingData={movie.ratingData}
               />
               <Link 
-                href={`/watch/movie/${params.id}`} 
+                href={`/watch/movie/${(await params).id}`} 
                 className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 md:py-2 md:px-4 rounded-lg transition-colors w-full sm:w-auto"
               >
                 <FaPlay />
