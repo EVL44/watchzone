@@ -1,7 +1,6 @@
 // src/app/user/[username]/page.jsx
 
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from "@/lib/session";
 import prisma from '@/lib/prisma';
 import UserProfileClient from '@/components/UserProfileClient';
 import { notFound } from 'next/navigation';
@@ -65,7 +64,7 @@ async function getUserProfile(username, currentUserId) {
 export default async function UserProfilePage({ params }) {
   const { username } = params;
 
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   const currentUserId = session?.user?.id || null;
 
   const profile = await getUserProfile(username, currentUserId);

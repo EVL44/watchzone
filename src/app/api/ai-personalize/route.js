@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getAuthSession } from '@/lib/session';
 import { geminiModel } from '@/lib/gemini';
 import { getTMDBDetails, searchTMDB } from '@/lib/tmdb';
 import prisma from '@/lib/prisma';
 
 export async function GET(req) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getAuthSession } from '@/lib/session';
 import { geminiModel } from '@/lib/gemini';
 import { searchTMDB, getTMDBDetails } from '@/lib/tmdb';
 
 export async function POST(req) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

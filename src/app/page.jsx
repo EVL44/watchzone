@@ -2,8 +2,7 @@ import PopularMovies from "../components/PopularMovies";
 import PopularSeries from "../components/PopularSeries";
 import Trending from "../components/Trending";
 import Adsense from "@/components/Adsense";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthSession } from "@/lib/session";
 import HeroSearch from "@/components/HeroSearch";
 import PersonalizedSection from "@/components/PersonalizedSection";
 import { headers } from 'next/headers';
@@ -42,7 +41,7 @@ function getTrendingBackdrop(items) {
 
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   const user = session?.user;
 
   const initialTrending = await getTrendingData('day');

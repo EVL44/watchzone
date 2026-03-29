@@ -7,7 +7,7 @@ import { getToken } from 'next-auth/jwt';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
-  const { username } = params;
+  const { username } = await params;
   
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const currentUserId = token?.id || null;

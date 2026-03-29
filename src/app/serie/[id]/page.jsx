@@ -2,8 +2,7 @@ import Image from 'next/image';
 import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaStar, FaTv, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from "@/lib/session";
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
@@ -164,7 +163,7 @@ async function getSerieDetails(id, userId) {
 }
 
 export default async function SerieDetailsPage({ params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   let userId = session?.user?.id || null;
 
   const serie = await getSerieDetails(params.id, userId);

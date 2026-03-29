@@ -2,8 +2,7 @@ import Image from 'next/image';
 import cloudinaryLoader from '@/lib/cloudinaryLoader';
 import { FaStar, FaClock, FaCalendarAlt, FaPlay } from 'react-icons/fa';
 import CastCard from '@/components/CastCard';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from "@/lib/session";
 import prisma from '@/lib/prisma';
 import MediaActionButtons from '@/components/MediaActionButtons';
 import Adsense from '@/components/Adsense';
@@ -166,7 +165,7 @@ async function getMovieDetails(id, userId) {
 }
 
 export default async function MoviePage({ params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   let userId = session?.user?.id || null;
 
   const movie = await getMovieDetails(params.id, userId);
