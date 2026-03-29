@@ -65,27 +65,7 @@ export const authOptions = {
     strategy: "jwt",
   },
 
-  cookies: {
-    sessionToken: {
-      name: isProduction ? `__Secure-next-auth.session-token` : `next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: isProduction,
-      },
-    },
-    // ... other cookie settings
-    csrfToken: {
-      name: isProduction ? `__Host-next-auth.csrf-token` : `next-auth.csrf-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: isProduction,
-      },
-    },
-  },
+
 
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
